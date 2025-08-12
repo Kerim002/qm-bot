@@ -13,20 +13,21 @@ const pathfinder = new BoardGamePathfinder();
 //red
 const arrayBoard = {
   blocked: [4, 4] as [number, number],
-  myPos: [1, 3] as [number, number],
-  opponentPos: [0, 4] as [number, number],
+  myPos: [7, 7] as [number, number],
+  opponentPos: [4, 7] as [number, number],
   myOP: 0,
-  opponentOP: 0,
+  opponentOP: 3,
   myCenters: [
-    [4, 0],
-    [1, 1],
+    [7, 1],
+    [8, 4],
+    [7, 7],
   ] as [number, number][],
   opponentCenters: [
-    [1, 1],
+    [4, 8],
     [1, 7],
-    [0, 4],
   ] as [number, number][],
   centers: new Set(["1,1", "4,0", "7,1", "8,4", "7,7", "4,8", "1,7", "0,4"]),
+  level: "high" as "high" | "middle" | "low",
 };
 
 const board = pathfinder.convertArrayBoard(arrayBoard);
