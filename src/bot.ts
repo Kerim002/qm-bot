@@ -3,31 +3,6 @@ import { guestLogin } from "./authenticateBot";
 import { PlayerSchema, WSMessage } from "./types/game";
 import { getRandomPosition } from "./helpers/getRandomPosition";
 import { getPossibleMovePaths } from "./helpers/getPossibleMoves";
-// import { getPossibleMoves } from "./helpers/getPossibleMoves";
-
-// const testArray = [
-//   [
-//     {
-//       x: 0,
-//       y: 0,
-//       isOccupied: false,
-//       isOcuppationCenter: false,
-//       hasOwner: null,
-//       occupied:null
-//     },
-//   ],
-// ];
-
-const centers = [
-  [1, 1],
-  [4, 0],
-  [7, 1],
-  [8, 4],
-  [7, 7],
-  [4, 8],
-  [1, 7],
-  [0, 4],
-];
 
 export class GameBot {
   private ws?: WebSocket;
