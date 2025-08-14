@@ -10,7 +10,8 @@ export type WSMessage =
   | AnswerResultMessage
   | MovedMessage
   | ZoneOccupiedMessage
-  | GameOverMessage;
+  | GameOverMessage
+  | PlayerDisconnected;
 
 export interface JoinedMessage {
   type: "player_joined";
@@ -33,8 +34,19 @@ export interface GameStartedMessage {
       occupant_id: number | null;
       occupation_points: number;
     }[];
+    shop_items: {
+      HEALING_POTION: ShopItemSchema;
+      TELEPORT_STONE: ShopItemSchema;
+      LUCKY_CHARM: ShopItemSchema;
+    };
   };
 }
+
+export type ShopItemSchema = {
+  name: string;
+  description: string;
+  price: number;
+};
 
 export interface RoundStartedMessage {
   type: "round_started";
@@ -68,7 +80,7 @@ export interface QuestionAskedMessage {
 
 export interface AnswerResultMessage {
   type: "answer_result";
-  input: {
+  output: {
     game_id: number;
     player_id: number;
     question_id: number;
@@ -93,7 +105,7 @@ export interface MovedMessage {
 }
 
 export interface ZoneOccupiedMessage {
-  type: "zone_occupied";
+  type: "zone_occupation_attempted";
   output: {
     game_id: string;
     player_id: number;
@@ -120,4 +132,8 @@ export interface PlayerSchema {
   hp: number;
   coins: number;
   power_points: number;
+}
+
+export interface PlayerDisconnected {
+  type: "player_disconnected";
 }

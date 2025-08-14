@@ -1,19 +1,18 @@
 import axios from "axios";
-import { gql } from "graphql-request";
 import dotenv from "dotenv";
 
 dotenv.config();
 const GRAPHQL_ENDPOINT =
   process.env.GRAPHQL_URL || "http://95.85.125.54:2025/graphq";
 
-type GuestLoginResponse = {
-  guestLogin: {
-    sessionId: string;
-    user: {
-      id: string;
-    };
-  };
-};
+// type GuestLoginResponse = {
+//   guestLogin: {
+//     sessionId: string;
+//     user: {
+//       id: string;
+//     };
+//   };
+// };
 
 export async function guestLogin(deviceId: string) {
   try {

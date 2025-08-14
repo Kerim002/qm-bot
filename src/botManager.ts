@@ -14,7 +14,7 @@ export class BotManager {
       });
       this.bots.push(bot);
       // bot.connectToGame();
-      setTimeout(() => bot.connectToGame(), i * 100);
+      setTimeout(() => bot.loginToGame(), i * 100);
     }
   }
 }

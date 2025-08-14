@@ -1,9 +1,19 @@
 import WebSocket from "ws";
-import { guestLogin } from "./authenticateBot";
+import { guestLogin } from "./auth/authenticateBot";
 import { PlayerSchema, WSMessage } from "./types/game";
-import { getRandomPosition } from "./helpers/getRandomPosition";
-import { getPossibleMovePaths } from "./helpers/getPossibleMoves";
+import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
+import { findShortestPath } from "./helpers/findShortestPath";
 
+const ocupationCenters = [
+  [1, 1],
+  [4, 0],
+  [7, 1],
+  [8, 4],
+  [7, 7],
+  [4, 8],
+  [1, 7],
+  [0, 4],
+];
 export class GameBot {
   private ws?: WebSocket;
   private status: "idle" | "searching" | "playing" = "idle";
@@ -11,6 +21,8 @@ export class GameBot {
   private botId: number = -1;
   private bot?: PlayerSchema = undefined;
   private opponent?: PlayerSchema = undefined;
+  private botOccupiedPositions = [] as [number, number][];
+  private opponentOccupiedPositions = [] as [number, number][];
 
   constructor(
     public name: string,
@@ -32,9 +44,12 @@ export class GameBot {
     }
   }
 
+  private pathfinder = new BoardGamePathfinder();
+
   private handleGameMessage(message: WSMessage) {
     switch (message.type) {
       case "player_joined":
+        console.log("player joined");
         break;
 
       case "game_started": {
@@ -43,38 +58,24 @@ export class GameBot {
         const opponent = message.output.players.find(
           (p) => p.id !== this.botId
         );
-        // console.log("bot id " + this.botId);
-        // console.log("players");
-        // console.table(message.output.players[0]);
-        // console.table(message.output.players[1]);
-        // console.log("Bot table");
-        // console.table(bot);
-        // console.log("opponent table");
-        // console.table(opponent);
+
         if (bot) this.bot = bot;
         if (opponent) this.opponent = opponent;
         break;
       }
       case "round_started": {
-        // console.log(`[${this.name}] Game started`);
-        // console.table(message.output.players[0]);
-        // console.table(message.output.players[1]);
         const bot = message.output.players.find((p) => p.id === this.botId);
         const opponent = message.output.players.find(
           (p) => p.id !== this.botId
         );
-        // console.log(`oponnent bot id`, opponent?.id);
-        // console.log(`[${this.name}] bot id`, bot?.id);
+        console.log("round statered");
+
         if (bot) this.bot = bot;
         if (opponent) this.opponent = opponent;
         break;
       }
       case "turn_started":
-        // console.log(this.botId + "==" + message.output.player_id);
         if (message.output.player_id === this.botId) {
-          // console.log(`[${this.name}] My turn!`);
-          // console.log("bot id", this.botId);
-          // console.log("message id", message.output.player_id);
           this.takeTurn();
         } else {
           console.log(`[${this.name}] Not my turn`);
@@ -82,23 +83,78 @@ export class GameBot {
         break;
 
       case "question_asked":
+        console.log("question asked");
+        console.table(message.output);
         if (message.output.player_id === this.botId) {
           this.answerQuestion(message.output);
         }
         break;
 
       case "answer_result":
-        console.log(
-          `[${this.name}] Answer result:`,
-          message.input.is_correct ? "Correct" : "Wrong"
-        );
+        console.log("answer result", message);
+        console.table(message.output);
         break;
 
       case "player_moved":
-        console.log(`[${this.name}] Moved:`, message.output.move_path);
-        break;
+        const movedPosition = message.output.move_path;
+        const lastPos = movedPosition[movedPosition.length - 1];
 
-      case "zone_occupied":
+        const isOccupationCenter = ocupationCenters.some(
+          ([x, y]) => x === lastPos[0] && y === lastPos[1]
+        );
+
+        if (message.output.player_id === this.botId) {
+          // BOT movement
+          if (this.bot) {
+            this.bot.position = lastPos;
+
+            if (isOccupationCenter) {
+              this.opponentOccupiedPositions =
+                this.opponentOccupiedPositions.filter(
+                  ([ox, oy]) => !(ox === lastPos[0] && oy === lastPos[1])
+                );
+
+              const alreadyInBot = this.botOccupiedPositions.some(
+                ([bx, by]) => bx === lastPos[0] && by === lastPos[1]
+              );
+
+              if (!alreadyInBot) {
+                this.botOccupiedPositions = [
+                  ...this.botOccupiedPositions,
+                  lastPos,
+                ];
+              }
+            }
+          }
+        } else {
+          // OPPONENT movement
+          if (this.opponent) {
+            this.opponent.position = lastPos;
+
+            if (isOccupationCenter) {
+              // Remove from bot's occupied list
+              this.botOccupiedPositions = this.botOccupiedPositions.filter(
+                ([bx, by]) => !(bx === lastPos[0] && by === lastPos[1])
+              );
+
+              // Add only if not already in opponent's list
+              const alreadyInOpponent = this.opponentOccupiedPositions.some(
+                ([ox, oy]) => ox === lastPos[0] && oy === lastPos[1]
+              );
+
+              if (!alreadyInOpponent) {
+                this.opponentOccupiedPositions = [
+                  ...this.opponentOccupiedPositions,
+                  lastPos,
+                ];
+              }
+            }
+          }
+        }
+
+        console.log(`[${this.name}] Moved:`, movedPosition);
+        break;
+      case "zone_occupation_attempted":
         console.log(`[${this.name}] Moved:`, message.output);
         break;
 
@@ -106,8 +162,12 @@ export class GameBot {
         console.log(
           `[${this.name}] Game over. Winner: ${message.output.winner}`
         );
-        this.setStatus("idle");
+        this.reconnectGame();
+
         break;
+
+      case "player_disconnected":
+      // this.reconnectGame();
 
       default:
         console.log(`[${this.name}] Unhandled message type: ${message}`);
@@ -117,22 +177,42 @@ export class GameBot {
   }
 
   private takeTurn() {
+    const arrayBoard = {
+      blocked: [4, 4] as [number, number],
+      myPos: this.bot?.position as [number, number],
+      opponentPos: this.opponent?.position as [number, number],
+      myOP: this.bot?.power_points ?? 0,
+      opponentOP: this.bot?.power_points ?? 0,
+      myCenters: this.botOccupiedPositions as [number, number][],
+      opponentCenters: this.opponentOccupiedPositions as [number, number][],
+      centers: new Set([
+        "1,1",
+        "4,0",
+        "7,1",
+        "8,4",
+        "7,7",
+        "4,8",
+        "1,7",
+        "0,4",
+      ]),
+      level: "high" as "high" | "middle" | "low",
+    };
+
     // console.log("take turn object id" + this.bot?.id);
     if (this.bot) {
-      const movePath = getRandomPosition(
-        getPossibleMovePaths({
-          x: this.bot.position[0],
-          y: this.bot.position[1],
-        })
-      );
-
-      console.log("take turn id" + this.botId);
-      console.log(movePath);
-
-      this.sendMessage({
-        type: "move",
-        input: { move_path: movePath },
-      });
+      const board = this.pathfinder.convertArrayBoard(arrayBoard);
+      const bestPath = this.pathfinder.getBestPath(board);
+      if (bestPath) {
+        console.log(bestPath[bestPath.length - 1]);
+        const shortestMove = findShortestPath(this.bot.position, [
+          bestPath[bestPath.length - 1].x,
+          bestPath[bestPath.length - 1].y,
+        ]);
+        this.sendMessage({
+          type: "move",
+          input: { move_path: shortestMove },
+        });
+      }
 
       // Send end turn after short delay
       setTimeout(() => {
@@ -142,18 +222,64 @@ export class GameBot {
   }
 
   private answerQuestion(question: any) {
-    const randomOption = Math.floor(Math.random() * question.options.length);
+    const randomOption = Math.floor(Math.random() * 3);
+
     console.log(
       `[${this.name}] Answering question with option #${randomOption}`
     );
 
+    console.log("send option id", randomOption);
+
     this.sendMessage({
       type: "submit_answer",
-      input: { option: randomOption },
+      input: { option_idx: 2 },
     });
   }
 
-  async connectToGame() {
+  private async connectToGame() {
+    this.ws = new WebSocket(this.serverUrl + "/ws/game", {
+      headers: {
+        authorization: `Session ${this.sessionId}`,
+      },
+    });
+
+    this.ws.on("open", () => {
+      console.log(`[${this.name}] Connected to game`);
+      this.setStatus("playing");
+    });
+
+    this.ws.on("message", (data) => {
+      const raw = data.toString();
+      try {
+        const message = JSON.parse(raw);
+        this.handleGameMessage(message);
+      } catch (err) {
+        console.error(`[${this.name}] Invalid message format`, err);
+      }
+    });
+
+    this.ws.on("close", (code, reason) => {
+      console.log(`[${this.name}] Disconnected: ${code} ${reason.toString()}`);
+      this.reconnectGame();
+    });
+
+    this.ws.on("error", (err) => {
+      console.error(`[${this.name}] WebSocket error`, err);
+    });
+  }
+
+  private reconnectGame() {
+    this.bot = undefined;
+    this.opponent = undefined;
+    this.botOccupiedPositions = [];
+    this.opponentOccupiedPositions = [];
+    this.setStatus("idle");
+    setTimeout(() => {
+      this.connectToGame();
+    }, 5000);
+  }
+
+  async loginToGame() {
     try {
       const deviceId = `bot-${this.name}-${Math.random()
         .toString(36)
@@ -161,38 +287,7 @@ export class GameBot {
       const login = await guestLogin(deviceId);
       this.sessionId = login.sessionId;
       this.botId = login.userId;
-
-      this.ws = new WebSocket(this.serverUrl + "/ws/game", {
-        headers: {
-          authorization: `Session ${this.sessionId}`,
-        },
-      });
-
-      this.ws.on("open", () => {
-        console.log(`[${this.name}] Connected to game`);
-        this.setStatus("playing");
-      });
-
-      this.ws.on("message", (data) => {
-        const raw = data.toString();
-        try {
-          const message = JSON.parse(raw);
-          this.handleGameMessage(message);
-        } catch (err) {
-          console.error(`[${this.name}] Invalid message format`, err);
-        }
-      });
-
-      this.ws.on("close", (code, reason) => {
-        console.log(
-          `[${this.name}] Disconnected: ${code} ${reason.toString()}`
-        );
-        this.setStatus("idle");
-      });
-
-      this.ws.on("error", (err) => {
-        console.error(`[${this.name}] WebSocket error`, err);
-      });
+      this.connectToGame();
     } catch (err) {
       console.error(`[${this.name}] Failed to connect to game`, err);
     }
