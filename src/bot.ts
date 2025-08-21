@@ -1,8 +1,9 @@
 import WebSocket from "ws";
 import { guestLogin } from "./auth/authenticateBot";
-import { PlayerSchema, WSMessage } from "./types/game";
+import { PlayerSchema, ShopItemsSchema, WSMessage } from "./types/game";
 import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
 import { findShortestPath } from "./helpers/findShortestPath";
+import { getBestShopMove } from "./helpers/bestShopPath";
 
 const ocupationCenters = [
   [1, 1],
@@ -23,6 +24,8 @@ export class GameBot {
   private opponent?: PlayerSchema = undefined;
   private botOccupiedPositions = [] as [number, number][];
   private opponentOccupiedPositions = [] as [number, number][];
+  private shopItems = {} as ShopItemsSchema;
+  private inventory = [] as string[];
 
   constructor(
     public name: string,
@@ -40,7 +43,7 @@ export class GameBot {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn(`[${this.name}] Cannot send, WebSocket not open`);
+      // console.warn(`[${this.name}] Cannot send, WebSocket not open`);
     }
   }
 
@@ -53,7 +56,6 @@ export class GameBot {
         break;
 
       case "game_started": {
-        // console.table(message.output.players);
         const bot = message.output.players.find((p) => p.id === this.botId);
         const opponent = message.output.players.find(
           (p) => p.id !== this.botId
@@ -61,6 +63,7 @@ export class GameBot {
 
         if (bot) this.bot = bot;
         if (opponent) this.opponent = opponent;
+        this.shopItems = message.output.shop_items;
         break;
       }
       case "round_started": {
@@ -68,7 +71,6 @@ export class GameBot {
         const opponent = message.output.players.find(
           (p) => p.id !== this.botId
         );
-        console.log("round statered");
 
         if (bot) this.bot = bot;
         if (opponent) this.opponent = opponent;
@@ -78,21 +80,38 @@ export class GameBot {
         if (message.output.player_id === this.botId) {
           this.takeTurn();
         } else {
-          console.log(`[${this.name}] Not my turn`);
+          // console.log(`[${this.name}] Not my turn`);
         }
+
+        if (
+          this.bot &&
+          this.bot.hp < 280 &&
+          this.bot.coins > this.shopItems["HEALING_POTION"].price
+        ) {
+          this.buyHealItem();
+          console.log("Heal item buy");
+        }
+        if (
+          this.bot &&
+          this.inventory.includes("HEALING_POTION") &&
+          this.bot.hp < 280
+        ) {
+          console.log("use heal sended old heal", this.bot.hp);
+          console.log("use heal sended old coin", this.bot.coins);
+          this.sendMessage({ type: "use_healing_potion", input: {} });
+        }
+
         break;
 
       case "question_asked":
-        console.log("question asked");
-        console.table(message.output);
         if (message.output.player_id === this.botId) {
           this.answerQuestion(message.output);
         }
         break;
 
       case "answer_result":
-        console.log("answer result", message);
-        console.table(message.output);
+        // console.log("answer result", message);
+        // console.table(message.output);
         break;
 
       case "player_moved":
@@ -152,23 +171,51 @@ export class GameBot {
           }
         }
 
-        console.log(`[${this.name}] Moved:`, movedPosition);
+        // console.log(`[${this.name}] Moved:`, movedPosition);
         break;
       case "zone_occupation_attempted":
-        console.log(`[${this.name}] Moved:`, message.output);
+        // console.log(`[${this.name}] Moved:`, message.output);
         break;
 
       case "game_over":
         console.log(
           `[${this.name}] Game over. Winner: ${message.output.winner}`
         );
-        this.reconnectGame();
+        this.restartGame();
 
         break;
 
       case "player_disconnected":
-      // this.reconnectGame();
+        console.log("player disconnect");
+        // this.reconnectGame();
 
+        break;
+      case "item_bought":
+        let inventory = this.inventory;
+        if (message.output.player_id === this.botId && this.bot) {
+          inventory.push(message.output.item_type);
+          this.inventory = inventory;
+          this.bot.coins = message.output.remaining_coins;
+        }
+        console.log("ramian coins", this.bot?.coins);
+        console.log("invetory", inventory);
+        break;
+
+      case "player_healed":
+        if (message.output.player_id === this.botId && this.bot) {
+          let inventory = this.inventory.filter(
+            (item) => item !== "HEALING_POTION"
+          );
+
+          this.bot.hp = message.output.player_hp;
+
+          this.inventory = inventory;
+        }
+
+        console.log("new hp", this.bot?.hp);
+        console.log("deleted from inventory", this.inventory);
+
+        break;
       default:
         console.log(`[${this.name}] Unhandled message type: ${message}`);
         console.table(message);
@@ -185,54 +232,76 @@ export class GameBot {
       opponentOP: this.bot?.power_points ?? 0,
       myCenters: this.botOccupiedPositions as [number, number][],
       opponentCenters: this.opponentOccupiedPositions as [number, number][],
-      centers: new Set([
-        "1,1",
-        "4,0",
-        "7,1",
-        "8,4",
-        "7,7",
-        "4,8",
-        "1,7",
-        "0,4",
-      ]),
+
       level: "high" as "high" | "middle" | "low",
     };
 
     // console.log("take turn object id" + this.bot?.id);
-    if (this.bot) {
-      const board = this.pathfinder.convertArrayBoard(arrayBoard);
-      const bestPath = this.pathfinder.getBestPath(board);
-      if (bestPath) {
-        console.log(bestPath[bestPath.length - 1]);
-        const shortestMove = findShortestPath(this.bot.position, [
-          bestPath[bestPath.length - 1].x,
-          bestPath[bestPath.length - 1].y,
-        ]);
+    if (this.bot && this.opponent) {
+      const bestPathToShop = getBestShopMove(
+        this.bot.position,
+        this.opponent.position
+      );
+      if (
+        this.bot.hp < 280 &&
+        bestPathToShop?.length &&
+        bestPathToShop[0] >= 3 &&
+        bestPathToShop[0] <= 5 &&
+        bestPathToShop[1] >= 3 &&
+        bestPathToShop[1] <= 5
+      ) {
+        const toShop = findShortestPath(this.bot.position, bestPathToShop);
         this.sendMessage({
           type: "move",
-          input: { move_path: shortestMove },
+          input: { move_path: toShop },
         });
+        console.log("Go to shop");
+      } else {
+        const board = this.pathfinder.convertArrayBoard(arrayBoard);
+        const bestPath = this.pathfinder.getBestPath(board);
+        if (bestPath) {
+          const shortestMove = findShortestPath(this.bot.position, [
+            bestPath[bestPath.length - 1].x,
+            bestPath[bestPath.length - 1].y,
+          ]);
+          this.sendMessage({
+            type: "move",
+            input: { move_path: shortestMove },
+          });
+        }
       }
 
-      // Send end turn after short delay
       setTimeout(() => {
         this.sendMessage({ type: "end_turn", input: {} });
       }, 3000);
     }
   }
 
+  private buyHealItem() {
+    if (this.bot) {
+      const { position } = this.bot;
+      if (
+        position[0] >= 3 &&
+        position[0] <= 5 &&
+        position[1] >= 3 &&
+        position[1] <= 5
+      ) {
+        this.sendMessage({
+          type: "buy_item",
+          input: {
+            item_type: "HEALING_POTION",
+          },
+        });
+      }
+    }
+  }
+
   private answerQuestion(question: any) {
-    const randomOption = Math.floor(Math.random() * 3);
-
-    console.log(
-      `[${this.name}] Answering question with option #${randomOption}`
-    );
-
-    console.log("send option id", randomOption);
+    const randomOption = Math.floor(Math.random() * 1);
 
     this.sendMessage({
       type: "submit_answer",
-      input: { option_idx: 2 },
+      input: { option_idx: randomOption },
     });
   }
 
@@ -260,7 +329,7 @@ export class GameBot {
 
     this.ws.on("close", (code, reason) => {
       console.log(`[${this.name}] Disconnected: ${code} ${reason.toString()}`);
-      this.reconnectGame();
+      this.restartGame();
     });
 
     this.ws.on("error", (err) => {
@@ -268,7 +337,7 @@ export class GameBot {
     });
   }
 
-  private reconnectGame() {
+  private restartGame() {
     this.bot = undefined;
     this.opponent = undefined;
     this.botOccupiedPositions = [];

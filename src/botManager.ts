@@ -10,7 +10,7 @@ export class BotManager {
   startBots(count: number) {
     for (let i = 0; i < count; i++) {
       const bot = new GameBot(`Bot ${i}}`, 10, this.wsUrl, (bot, status) => {
-        // console.log(`BotManager: ${i} is now ${status}`);
+        console.log(`BotManager: ${i} is now ${status}`);
       });
       this.bots.push(bot);
       // bot.connectToGame();

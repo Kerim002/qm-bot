@@ -5,6 +5,8 @@ dotenv.config();
 const GRAPHQL_ENDPOINT =
   process.env.GRAPHQL_URL || "http://95.85.125.54:2025/graphq";
 
+console.log(GRAPHQL_ENDPOINT);
+
 // type GuestLoginResponse = {
 //   guestLogin: {
 //     sessionId: string;

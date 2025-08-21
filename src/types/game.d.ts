@@ -11,7 +11,9 @@ export type WSMessage =
   | MovedMessage
   | ZoneOccupiedMessage
   | GameOverMessage
-  | PlayerDisconnected;
+  | PlayerDisconnected
+  | ItemBought
+  | PlayerHealed;
 
 export interface JoinedMessage {
   type: "player_joined";
@@ -20,6 +22,16 @@ export interface JoinedMessage {
     player_id: number;
     player_name: string;
     player_position: [number, number];
+  };
+}
+
+export interface ItemBought {
+  type: "item_bought";
+  output: {
+    game_id: string;
+    player_id: number;
+    item_type: string;
+    remaining_coins: number;
   };
 }
 
@@ -62,6 +74,15 @@ export interface TurnStartedMessage {
   output: {
     game_id: string;
     player_id: number;
+  };
+}
+
+export interface PlayerHealed {
+  type: "player_healed";
+  output: {
+    game_id: string;
+    player_id: number;
+    player_hp: number;
   };
 }
 
@@ -137,3 +158,13 @@ export interface PlayerSchema {
 export interface PlayerDisconnected {
   type: "player_disconnected";
 }
+
+type ShopItemSchema = {
+  name: string;
+  description: string;
+  price: number;
+};
+
+type ShopItemsSchema = {
+  [key: string]: ShopItem;
+};
