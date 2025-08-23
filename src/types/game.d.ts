@@ -159,12 +159,12 @@ export interface PlayerDisconnected {
   type: "player_disconnected";
 }
 
-type ShopItemSchema = {
+export type ShopItemSchema = {
   name: string;
   description: string;
   price: number;
 };
 
-type ShopItemsSchema = {
+export type ShopItemsSchema = {
   [key: string]: ShopItem;
 };

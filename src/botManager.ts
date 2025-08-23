@@ -1,4 +1,6 @@
-import { GameBot } from "./bot";
+// import { GameBot } from "./bot";
+
+import { GameBot } from "./GameBot";
 
 // const bots = ["red", "blue"];
 
