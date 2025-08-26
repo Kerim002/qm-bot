@@ -7,6 +7,7 @@ import { getOpponentBlockedArea } from "../helpers/getOpponentBlockedArea";
 import { isBlocked } from "../helpers/isBlocked";
 import { positionsEqual } from "../helpers/positionsEqual";
 import { OCCUPATION_CENTERS } from "../shared/contstants/constants";
+import { OccupiedPosition } from "../types/game";
 import { BestMoveResult, Board, PathNode, Position } from "../types/global";
 
 export class BoardGamePathfinder {
@@ -274,8 +275,8 @@ export class BoardGamePathfinder {
     opponentPos: [number, number];
     myOP: number;
     opponentOP: number;
-    myCenters: [number, number][];
-    opponentCenters: [number, number][];
+    myCenters: OccupiedPosition[];
+    opponentCenters: OccupiedPosition[];
     level?: "high" | "middle" | "low";
   }): Board {
     return {
@@ -289,8 +290,8 @@ export class BoardGamePathfinder {
       },
       myOP: arrayBoard.myOP,
       opponentOP: arrayBoard.opponentOP,
-      myCenters: arrayBoard.myCenters.map(([x, y]) => ({ x, y })),
-      opponentCenters: arrayBoard.opponentCenters.map(([x, y]) => ({ x, y })),
+      myCenters: arrayBoard.myCenters,
+      opponentCenters: arrayBoard.opponentCenters,
       level: arrayBoard.level || "high",
     };
   }

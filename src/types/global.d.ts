@@ -5,8 +5,8 @@ export interface Board {
   opponentPos: Position;
   myOP: number;
   opponentOP: number;
-  myCenters: Position[];
-  opponentCenters: Position[];
+  myCenters: OccupiedPosition[];
+  opponentCenters: OccupiedPosition[];
   level?: "high" | "middle" | "low";
 }
 

@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const GRAPHQL_ENDPOINT =
-  process.env.GRAPHQL_URL || "http://95.85.125.54:2025/graphq";
+  process.env.GRAPHQL_URL || "http://95.85.125.54:2025/graphql";
 
 console.log(GRAPHQL_ENDPOINT);
 
@@ -22,10 +22,12 @@ export async function guestLogin(deviceId: string) {
       GRAPHQL_ENDPOINT,
       {
         query: `
-        mutation GuestLogin($deviceId: String!) {
-          guestLogin(deviceId: $deviceId) {
-            user { id }
-            sessionId
+        mutation BasicLogin{
+          basicLogin(input: { username: "bot6000", password: "54321" }) {
+          user {
+            id
+          }
+          sessionId
           }
         }
       `,
@@ -40,8 +42,46 @@ export async function guestLogin(deviceId: string) {
     );
 
     return {
-      sessionId: response.data.data.guestLogin.sessionId,
-      userId: Number(response.data.data.guestLogin.user.id),
+      sessionId: response.data.data.basicLogin.sessionId,
+      userId: Number(response.data.data.basicLogin.user.id),
+    };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+}
+
+export async function basicLogin(payload: {
+  username: string;
+  password: string;
+}) {
+  try {
+    const response = await axios.post(
+      GRAPHQL_ENDPOINT,
+      {
+        query: `
+        mutation BasicLogin($username:String!, $password:String!){
+          basicLogin(input: { username: $username, password: $password }) {
+          user {
+            id
+          }
+          sessionId
+          }
+        }
+      `,
+        variables: { ...payload },
+      },
+      {
+        timeout: 5000,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return {
+      sessionId: response.data.data.basicLogin.sessionId,
+      userId: Number(response.data.data.basicLogin.user.id),
     };
   } catch (err) {
     console.log(err);

@@ -1,4 +1,5 @@
-import { WSMessage } from "../types/game";
+import { filterZones } from "../helpers/filterZones";
+import { MovedOutput, WSMessage, ZoneSchema } from "../types/game";
 import { GameState } from "./GameState";
 import { ShopService } from "./ShopService";
 
@@ -9,7 +10,9 @@ export class MessageHandler {
     private botId: number,
     private onTurnStart: () => void,
     private onGameOver: () => void,
-    private onQuestionAsked: (question: any) => void
+    private onQuestionAsked: () => void,
+    private onEndTurn: () => void,
+    private onReconnect: () => void
   ) {}
 
   handleMessage(message: WSMessage) {
@@ -19,6 +22,7 @@ export class MessageHandler {
         break;
 
       case "game_started":
+        console.log("game started");
         this.gameState.updatePlayers(message.output.players, this.botId);
         this.gameState.shopItems = message.output.shop_items;
         break;
@@ -33,7 +37,7 @@ export class MessageHandler {
 
       case "question_asked":
         if (message.output.player_id === this.botId) {
-          this.onQuestionAsked(message.output);
+          this.onQuestionAsked();
         }
         break;
 
@@ -60,11 +64,58 @@ export class MessageHandler {
 
       case "answer_result":
         console.log("Answer result");
+        break;
 
+      case "player_reconnected":
+        if (this.botId === message.output.player_id) {
+          console.log("reconnecting");
+          this.gameState.updatePlayers(message.output.players, this.botId);
+          filterZones(message.output.zones).forEach((item) => {
+            if (item.occupant_id === this.botId) {
+              this.gameState.updateOccupation(
+                item.position,
+                true,
+                item.occupation_points
+              );
+            } else if (item.occupant_id) {
+              this.gameState.updateOccupation(
+                item.position,
+                false,
+                item.occupation_points
+              );
+            }
+          });
+
+          const inventoryArray: string[] = Object.entries(
+            message.output.inventory
+          ).flatMap(([item, count]) => Array(count).fill(item));
+
+          inventoryArray.forEach((i) => {
+            this.gameState.addToInventory(i);
+          });
+
+          const { phase, player_id } = message.output.turn;
+          if (player_id === this.botId) {
+            if (phase === "AWAITING_MOVE") {
+              this.handleTurnStart(player_id);
+            } else if (phase === "QUESTION_ASKED") {
+              this.onQuestionAsked();
+            } else if (phase === "POST_MOVE") {
+              this.onEndTurn();
+            }
+          }
+        }
       default:
-        console.log(
-          `Unhandled message type: ${message.type} ${message.output}`
-        );
+        console.log(`Unhandled message type: ${message.type} `);
+
+        if (message.type === "error") {
+          if (message.message === "Player already in game") {
+            console.log(message.message);
+            console.log("reconn");
+            this.onReconnect();
+          }
+        }
+        // console.table(message);
         break;
     }
   }
@@ -83,7 +134,7 @@ export class MessageHandler {
     }
   }
 
-  private handlePlayerMoved(output: any) {
+  private handlePlayerMoved(output: MovedOutput) {
     const movePath = output.move_path;
     const lastPosition = movePath[movePath.length - 1] as [number, number];
     const isBot = output.player_id === this.botId;
@@ -94,7 +145,7 @@ export class MessageHandler {
       this.gameState.opponent.position = lastPosition;
     }
 
-    this.gameState.updateOccupation(lastPosition, isBot);
+    this.gameState.updateOccupation(lastPosition, isBot, output.power_points);
   }
 
   private handleItemBought(output: any) {

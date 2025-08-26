@@ -13,7 +13,9 @@ export type WSMessage =
   | GameOverMessage
   | PlayerDisconnected
   | ItemBought
-  | PlayerHealed;
+  | PlayerHealed
+  | RecconnectedMessage
+  | ErrorMessage;
 
 export interface JoinedMessage {
   type: "player_joined";
@@ -23,6 +25,50 @@ export interface JoinedMessage {
     player_name: string;
     player_position: [number, number];
   };
+}
+
+export interface ErrorMessage {
+  type: "error";
+  message: string;
+}
+
+export interface RecconnectedMessage {
+  type: "player_reconnected";
+  output: {
+    game_id: string;
+    player_id: number;
+    players: PlayerSchema[];
+    zones: ZoneSchema[];
+    shop_items: ShopItemsSchema[];
+    inventory: {
+      [key: string]: number;
+    };
+    turn: {
+      player_id: number;
+      started_at: string;
+      round: number;
+      phase:
+        | "AWAITING_MOVE"
+        | "QUESTION_ASKED"
+        | "QUESTION_ANSWERED"
+        | "POST_MOVE";
+      question_asked: {
+        question_id: number;
+        subject_id: number;
+        prompt: string;
+        options: string[];
+        elo: number;
+      };
+    };
+  };
+}
+
+export interface ZoneSchema {
+  block: number;
+  occupant_id: null;
+  occupation_points: number;
+  subject_id: number | null;
+  subject_name: string | null;
 }
 
 export interface ItemBought {
@@ -116,13 +162,15 @@ export interface AnswerResultMessage {
 
 export interface MovedMessage {
   type: "player_moved";
-  output: {
-    game_id: string;
-    player_id: number;
-    move_path: [number, number][];
-    power_points: number;
-    coins: number;
-  };
+  output: MovedOutput;
+}
+
+export interface MovedOutput {
+  game_id: string;
+  player_id: number;
+  move_path: [number, number][];
+  power_points: number;
+  coins: number;
 }
 
 export interface ZoneOccupiedMessage {
@@ -167,4 +215,9 @@ export type ShopItemSchema = {
 
 export type ShopItemsSchema = {
   [key: string]: ShopItem;
+};
+
+export type OccupiedPosition = {
+  pos: number[];
+  opSpent: number;
 };

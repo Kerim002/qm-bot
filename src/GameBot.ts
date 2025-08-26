@@ -1,11 +1,12 @@
 // GameBot.ts (Refactored main class)
 import WebSocket from "ws";
-import { guestLogin } from "./auth/authenticateBot";
+import { basicLogin, guestLogin } from "./auth/authenticateBot";
 import { GameState } from "./services/GameState";
 import { ShopService } from "./services/ShopService";
 import { MovementService } from "./services/MovementService";
 import { MessageHandler } from "./services/MessageHandler";
 import { GAME_CONFIG } from "./constants/gameConstants";
+import { tryCatch } from "graphql-request/build/lib/prelude";
 
 export class GameBot {
   private ws?: WebSocket;
@@ -34,7 +35,9 @@ export class GameBot {
       this.botId,
       () => this.takeTurn(),
       () => this.restartGame(),
-      (question) => this.answerQuestion(question)
+      () => this.answerQuestion(),
+      () => this.endTurn(),
+      () => this.reconnectGame()
     );
   }
 
@@ -74,28 +77,47 @@ export class GameBot {
     }
 
     // End turn after timeout
+    this.endTurn();
+  }
+
+  private endTurn() {
     setTimeout(() => {
       this.sendMessage({ type: "end_turn", input: {} });
     }, GAME_CONFIG.TURN_TIMEOUT);
   }
 
-  private answerQuestion(question: any) {
-    const randomOption = Math.floor(Math.random() * 1); // Fixed: was * 1
+  private answerQuestion() {
+    // const randomOption = Math.floor(Math.random() * 1); // Fixed: was * 1
     this.sendMessage({
       type: "submit_answer",
       input: { option_idx: 0 },
     });
   }
 
-  private async connectToGame() {
-    this.ws = new WebSocket(this.serverUrl + "/ws/game", {
+  private async reconnectGame() {
+    try {
+      await this.connectToGame(true);
+    } catch (error) {
+      console.log("error reconnnecting", error);
+      await this.connectToGame();
+    }
+  }
+
+  private async connectToGame(reconnect: boolean = false) {
+    const url = reconnect
+      ? `${this.serverUrl}/ws/game?reconnect=true`
+      : `${this.serverUrl}/ws/game`;
+
+    this.ws = new WebSocket(url, {
       headers: {
         authorization: `Session ${this.sessionId}`,
       },
     });
 
     this.ws.on("open", () => {
-      console.log(`[${this.name}] Connected to game`);
+      console.log(
+        `[${this.name}] Connected to game${reconnect ? " (reconnected)" : ""}`
+      );
       this.setStatus("playing");
     });
 
@@ -115,6 +137,7 @@ export class GameBot {
 
     this.ws.on("error", (err) => {
       console.error(`[${this.name}] WebSocket error`, err);
+      this.restartGame();
     });
   }
 
@@ -126,12 +149,13 @@ export class GameBot {
     }, GAME_CONFIG.RECONNECT_DELAY);
   }
 
-  async loginToGame() {
+  async loginToGame(payload: { username: string; password: string }) {
     try {
       const deviceId = `bot-${this.name}-${Math.random()
         .toString(36)
         .slice(2)}`;
-      const login = await guestLogin(deviceId);
+      // const login = await guestLogin(deviceId);
+      const login = await basicLogin(payload);
       this.sessionId = login.sessionId;
       this.botId = login.userId;
 
@@ -142,10 +166,12 @@ export class GameBot {
         this.botId,
         () => this.takeTurn(),
         () => this.restartGame(),
-        (question) => this.answerQuestion(question)
+        () => this.answerQuestion(),
+        () => this.endTurn(),
+        () => this.reconnectGame()
       );
 
-      this.connectToGame();
+      this.reconnectGame().then((res) => console.log("res: ", res));
     } catch (err) {
       console.error(`[${this.name}] Failed to connect to game`, err);
     }
