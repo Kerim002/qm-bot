@@ -17,7 +17,6 @@ services:
       - ./data:/app/data
     # no ports: this is a headless worker
     # user is set in Dockerfile to 'node'
-    # logging options (optional)
     logging:
       driver: "json-file"
       options:
