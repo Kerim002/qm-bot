@@ -1,31 +1,40 @@
-# 1️⃣ Base image
+# -------------------------
+# 1) Build stage (TypeScript -> JS)
+# -------------------------
 FROM node:20-alpine AS builder
-
-# 2️⃣ Set working directory
 WORKDIR /app
 
-# 3️⃣ Copy only package.json & package-lock.json first (better caching)
-COPY package*.json tsconfig.json ./
+# Install dependencies (use npm ci for clean, reproducible installs)
+COPY package*.json ./
+RUN npm ci
 
-# 4️⃣ Install dependencies
-RUN npm install
-
-# 5️⃣ Copy source code
-COPY . .
-
-# 6️⃣ Build TypeScript
+# Copy sources and build
+COPY tsconfig.json ./
+COPY src ./src
 RUN npm run build
 
-
-# --- Production image ---
-FROM node:20-alpine
-
+# -------------------------
+# 2) Runtime stage (small, prod-only deps)
+# -------------------------
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-# 7️⃣ Copy built files and node_modules from builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
+# Keep container lean: only prod dependencies
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-# 8️⃣ Start app
+# Copy built JS
+COPY --from=builder /app/dist ./dist
+
+# Create data dir for persistent files (mounted by compose)
+RUN mkdir -p /app/data && chown -R node:node /app
+
+# Run as non-root user
+USER node
+
+# Default envs (can be overridden via docker-compose/.env)
+ENV NODE_ENV=production \
+    ACTIVE_BOTS_FILE=/app/data/active-bots.json
+
+# No ports needed; this is a worker/bot
 CMD ["node", "dist/index.js"]

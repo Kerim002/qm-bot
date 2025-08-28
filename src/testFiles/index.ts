@@ -1,5 +1,5 @@
 type BoardState = {
-  blocked: Set<string>; // Fixed blocked cells
+  blocked: Set<string>;
   myPos: [number, number];
   opponentPos: [number, number];
   mycurrentOP: number;
@@ -9,7 +9,7 @@ type BoardState = {
     spendedOp: number;
     position: { x: number; y: number };
   }>;
-  inventory: Array<string>; // Items like "HEALING_POTION", "TELEPORT_STONE", "LUCKY_CHARM"
+  inventory: Array<string>;
   positionsHistory: Array<{ x: number; y: number }>;
   totalCoin: number;
   health: number;

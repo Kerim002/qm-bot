@@ -1,0 +1,5 @@
+{
+  "watch": ["src"],
+  "ext": "ts,json",
+  "ignore": ["src/data/active-bots.json", "node_modules"]
+}

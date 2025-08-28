@@ -1,4 +1,5 @@
 import { filterZones } from "../helpers/filterZones";
+import { BotStatus } from "../types/bot";
 import { MovedOutput, WSMessage, ZoneSchema } from "../types/game";
 import { GameState } from "./GameState";
 import { ShopService } from "./ShopService";
@@ -9,20 +10,21 @@ export class MessageHandler {
     private shopService: ShopService,
     private botId: number,
     private onTurnStart: () => void,
-    private onGameOver: () => void,
     private onQuestionAsked: () => void,
     private onEndTurn: () => void,
-    private onReconnect: () => void
+    private onGameOver: () => void,
+    private onConnectGame: (payload: boolean) => void,
+    private makeAuth: () => void,
+    private setStatus: (payload: BotStatus) => void
   ) {}
 
   handleMessage(message: WSMessage) {
     switch (message.type) {
       case "player_joined":
-        console.log("Player joined");
         break;
 
       case "game_started":
-        console.log("game started");
+        this.setStatus("playing");
         this.gameState.updatePlayers(message.output.players, this.botId);
         this.gameState.shopItems = message.output.shop_items;
         break;
@@ -32,7 +34,9 @@ export class MessageHandler {
         break;
 
       case "turn_started":
-        this.handleTurnStart(message.output.player_id);
+        setTimeout(() => {
+          this.handleTurnStart(message.output.player_id);
+        }, 2000);
         break;
 
       case "question_asked":
@@ -55,6 +59,7 @@ export class MessageHandler {
 
       case "game_over":
         console.log(`Game over. Winner: ${message.output.winner}`);
+        this.gameState.reset();
         this.onGameOver();
         break;
 
@@ -67,6 +72,7 @@ export class MessageHandler {
         break;
 
       case "player_reconnected":
+        this.setStatus("playing");
         if (this.botId === message.output.player_id) {
           console.log("reconnecting");
           this.gameState.updatePlayers(message.output.players, this.botId);
@@ -96,6 +102,7 @@ export class MessageHandler {
 
           const { phase, player_id } = message.output.turn;
           if (player_id === this.botId) {
+            console.log("phase", phase);
             if (phase === "AWAITING_MOVE") {
               this.handleTurnStart(player_id);
             } else if (phase === "QUESTION_ASKED") {
@@ -105,17 +112,23 @@ export class MessageHandler {
             }
           }
         }
+
+      case "error":
+        console.log("error");
+        if (message.type === "error") {
+          console.log("message key", message.key);
+          if (message.key === "AUTH_SESSION_EXPIRED") {
+            this.makeAuth();
+          } else if (message.key === "GAME_NOT_FOUND_TO_RECONNECTION") {
+            this.onConnectGame(false);
+          } else if (message.key === "MATCHMAKING_TIMEOUT") {
+            this.onConnectGame(false);
+          }
+        }
+        break;
       default:
         console.log(`Unhandled message type: ${message.type} `);
 
-        if (message.type === "error") {
-          if (message.message === "Player already in game") {
-            console.log(message.message);
-            console.log("reconn");
-            this.onReconnect();
-          }
-        }
-        // console.table(message);
         break;
     }
   }
@@ -123,14 +136,6 @@ export class MessageHandler {
   private handleTurnStart(playerId: number) {
     if (playerId === this.botId) {
       this.onTurnStart();
-    }
-
-    if (this.shopService.canBuyHealingPotion()) {
-      console.log("Should buy healing potion");
-    }
-
-    if (this.shopService.shouldUseHealingPotion()) {
-      console.log("Should use healing potion");
     }
   }
 
@@ -152,8 +157,8 @@ export class MessageHandler {
     if (output.player_id === this.botId && this.gameState.bot) {
       this.gameState.addToInventory(output.item_type);
       this.gameState.bot.coins = output.remaining_coins;
-      console.log("Remaining coins:", this.gameState.bot.coins);
-      console.log("Inventory:", this.gameState.inventory);
+      // console.log("Remaining coins:", this.gameState.bot.coins);
+      // console.log("Inventory:", this.gameState.inventory);
     }
   }
 
@@ -161,8 +166,8 @@ export class MessageHandler {
     if (output.player_id === this.botId && this.gameState.bot) {
       this.gameState.removeFromInventory("HEALING_POTION");
       this.gameState.bot.hp = output.player_hp;
-      console.log("New HP:", this.gameState.bot.hp);
-      console.log("Updated inventory:", this.gameState.inventory);
+      // console.log("New HP:", this.gameState.bot.hp);
+      // console.log("Updated inventory:", this.gameState.inventory);
     }
   }
 }

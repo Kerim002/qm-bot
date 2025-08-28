@@ -1,6 +1,11 @@
+# dependencies & build outputs
 node_modules
 dist
-.git
-Dockerfile
-.dockerignore
-npm-debug.log
+
+# local env / logs / editor stuff
+.env
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vscode
+.DS_Store

@@ -1,0 +1,25 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: quiz-bot:prod
+    container_name: quiz-bot
+    restart: unless-stopped
+    env_file:
+      - .env # optional; define your own env here
+    environment:
+      # fallback if not provided in .env
+      NODE_ENV: production
+      ACTIVE_BOTS_FILE: /app/data/active-bots.json
+    volumes:
+      # persist active-bots.json and any other runtime files
+      - ./data:/app/data
+    # no ports: this is a headless worker
+    # user is set in Dockerfile to 'node'
+    # logging options (optional)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

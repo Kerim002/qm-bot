@@ -1,74 +1,35 @@
-// // import { GameBot } from "./bot";
-
-// import { GameBot } from "./GameBot";
-
-// // const bots = ["red", "blue"];
-
-// export class BotManager {
-//   private bots: GameBot[] = [];
-
-//   constructor(private wsUrl: string, private password: string) {}
-
-//   startBots(count: number) {
-//     for (let i = 0; i < count; i++) {
-//       const bot = new GameBot(`Bot ${i}}`, 10, this.wsUrl, (bot, status) => {
-//         console.log(`BotManager: ${i} is now ${status}`);
-//       });
-//       this.bots.push(bot);
-//       setTimeout(
-//         () => bot.loginToGame({ password: this.password, username: "bot000" }),
-//         i * 100
-//       );
-//     }
-//   }
-// }
-
 import fs from "fs";
 import path from "path";
-
-import { GameBot } from "./GameBot";
-import { BOT_RANGES } from "./constants/gameConstants";
+import { TestGameBot } from "./test-game-bot";
+import { BOT_RANGES } from "../constants/gameConstants";
 
 type TrophyRange = {
   min: number;
   max: number;
   names: string[];
   activeNames: Set<string>;
-  bots: Map<string, GameBot>;
+  bots: Map<string, TestGameBot>;
 };
 
+// const PERSIST_FILE = path.join(__dirname, "../data/active-bots.json");
+// const PERSIST_FILE = path.join(FILE);
 const DEFAULT_PATH = "/app/data/active-bots.json";
 const FILE = process.env.ACTIVE_BOTS_FILE || DEFAULT_PATH;
-const DEV_PATH = path.join(__dirname, "./data/active-bots.json");
+const DEV_PATH = path.join(__dirname, "../data/active-bots.json");
 export const PERSIST_FILE =
   process.env.NODE_ENV === "production" ? FILE : DEV_PATH;
 
-export class BotManager {
+export class TestBotManager {
   private ranges: TrophyRange[] = [];
 
-  constructor(private wsUrl: string, private password: string) {
+  constructor() {
     this.ranges = BOT_RANGES.map((r) => ({
       ...r,
       activeNames: new Set(),
       bots: new Map(),
     }));
 
-    // this.ranges = [
-    //   {
-    //     activeNames: new Set(),
-    //     bots: new Map(),
-    //     max: 0,
-    //     min: 500,
-    //     names: ["PixelSeeker", "KingLingo"],
-    //   },
-    //   {
-    //     activeNames: new Set(),
-    //     bots: new Map(),
-    //     max: 12000,
-    //     min: 11500,
-    //     names: ["smartpro", "Cool_bird"],
-    //   },
-    // ];
+    // ✅ On startup, load persisted bots
     this.loadPersistedBots();
   }
 
@@ -106,7 +67,7 @@ export class BotManager {
 
         range.activeNames.add(botInfo.name);
 
-        const bot = new GameBot(botInfo.name, this.wsUrl, (bot, status) => {
+        const bot = new TestGameBot(botInfo.name, (bot, status) => {
           console.log(`[${range.min}-${range.max}] ${bot.name} -> ${status}`);
           if (status === "playing") this.persistActiveBots();
           if (status === "idle") {
@@ -118,7 +79,7 @@ export class BotManager {
         });
 
         range.bots.set(botInfo.name, bot);
-        bot.startPlayingPersistent(this.password);
+        bot.startPlayingPersistent();
       }
     } catch (err) {
       console.error("Failed to load persisted bots:", err);
@@ -154,7 +115,7 @@ export class BotManager {
 
     range.activeNames.add(username);
 
-    const bot = new GameBot(username, this.wsUrl, (bot, status) => {
+    const bot = new TestGameBot(username, (bot, status) => {
       console.log(`[${range.min}-${range.max}] ${bot.name} -> ${status}`);
 
       if (status === "playing") {
@@ -171,6 +132,6 @@ export class BotManager {
     });
 
     range.bots.set(username, bot);
-    bot.startSearching(this.password);
+    bot.startSearching();
   }
 }

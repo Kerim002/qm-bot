@@ -79,12 +79,16 @@ export function evaluateCenter(
 //   myCenters: OccupiedPosition[],
 //   level: "high" | "middle" | "low" = "high"
 // ): CenterEvaluation {
-//   if (myCenters.some((c) => positionsEqual(c, centerPos))) {
+//   if (
+//     myCenters.some((c) =>
+//       positionsEqual({ x: c.pos[0], y: c.pos[1] }, centerPos)
+//     )
+//   ) {
 //     return { priority: 0, type: "owned" };
 //   }
 
 //   const opponentOwned = opponentCenters.find((c) =>
-//     positionsEqual(c, centerPos)
+//     positionsEqual({ x: c.pos[0], y: c.pos[1] }, centerPos)
 //   );
 //   if (opponentOwned) {
 //     let priority = 150;
