@@ -69,10 +69,10 @@ export class MessageHandler {
 
       case "answer_result":
         console.log("Answer result");
+        console.table(message.output);
         break;
 
       case "player_reconnected":
-        this.setStatus("playing");
         if (this.botId === message.output.player_id) {
           console.log("reconnecting");
           this.gameState.updatePlayers(message.output.players, this.botId);
@@ -146,6 +146,9 @@ export class MessageHandler {
 
     if (isBot && this.gameState.bot) {
       this.gameState.bot.position = lastPosition;
+      if (this.shopService.isInShopArea(lastPosition)) {
+        this.onEndTurn();
+      }
     } else if (this.gameState.opponent) {
       this.gameState.opponent.position = lastPosition;
     }

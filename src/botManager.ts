@@ -47,28 +47,28 @@ export class BotManager {
   private ranges: TrophyRange[] = [];
 
   constructor(private wsUrl: string, private password: string) {
-    // this.ranges = BOT_RANGES.map((r) => ({
-    //   ...r,
-    //   activeNames: new Set(),
-    //   bots: new Map(),
-    // }));
+    this.ranges = BOT_RANGES.map((r) => ({
+      ...r,
+      activeNames: new Set(),
+      bots: new Map(),
+    }));
 
-    this.ranges = [
-      {
-        activeNames: new Set(),
-        bots: new Map(),
-        max: 0,
-        min: 500,
-        names: ["PixelSeeker", "KingLingo"],
-      },
-      {
-        activeNames: new Set(),
-        bots: new Map(),
-        max: 12000,
-        min: 11500,
-        names: ["smartpro", "Cool_bird"],
-      },
-    ];
+    // this.ranges = [
+    //   {
+    //     activeNames: new Set(),
+    //     bots: new Map(),
+    //     max: 0,
+    //     min: 500,
+    //     names: ["PixelSeeker", "KingLingo"],
+    //   },
+    //   {
+    //     activeNames: new Set(),
+    //     bots: new Map(),
+    //     max: 12000,
+    //     min: 11500,
+    //     names: ["smartpro", "Cool_bird"],
+    //   },
+    // ];
 
     this.ensurePersistFileExists();
     this.loadPersistedBots();
