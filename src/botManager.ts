@@ -47,29 +47,46 @@ export class BotManager {
   private ranges: TrophyRange[] = [];
 
   constructor(private wsUrl: string, private password: string) {
-    this.ranges = BOT_RANGES.map((r) => ({
-      ...r,
-      activeNames: new Set(),
-      bots: new Map(),
-    }));
+    // this.ranges = BOT_RANGES.map((r) => ({
+    //   ...r,
+    //   activeNames: new Set(),
+    //   bots: new Map(),
+    // }));
 
-    // this.ranges = [
-    //   {
-    //     activeNames: new Set(),
-    //     bots: new Map(),
-    //     max: 0,
-    //     min: 500,
-    //     names: ["PixelSeeker", "KingLingo"],
-    //   },
-    //   {
-    //     activeNames: new Set(),
-    //     bots: new Map(),
-    //     max: 12000,
-    //     min: 11500,
-    //     names: ["smartpro", "Cool_bird"],
-    //   },
-    // ];
+    this.ranges = [
+      {
+        activeNames: new Set(),
+        bots: new Map(),
+        max: 0,
+        min: 500,
+        names: ["PixelSeeker", "KingLingo"],
+      },
+      {
+        activeNames: new Set(),
+        bots: new Map(),
+        max: 12000,
+        min: 11500,
+        names: ["smartpro", "Cool_bird"],
+      },
+    ];
+
+    this.ensurePersistFileExists();
     this.loadPersistedBots();
+  }
+
+  private ensurePersistFileExists() {
+    const dir = path.dirname(PERSIST_FILE);
+
+    // Create directory if missing
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    // Create file if missing
+    if (!fs.existsSync(PERSIST_FILE)) {
+      fs.writeFileSync(PERSIST_FILE, JSON.stringify([], null, 2), "utf-8");
+      console.log(`[INIT] Created empty active-bots.json at ${PERSIST_FILE}`);
+    }
   }
 
   private persistActiveBots() {
