@@ -1,9 +1,5 @@
 import { BotManager } from "./botManager";
 import dotenv from "dotenv";
-import { ZoneSchema } from "./types/game";
-import { OCCUPATION_CENTERS } from "./constants/gameConstants";
-import { filterZones } from "./helpers/filterZones";
-import { TestBotManager } from "./testFiles/test-bot-manager";
 
 dotenv.config();
 

@@ -43,7 +43,7 @@ export class GameBot {
     );
   }
 
-  private setStatus(status: "idle" | "searching" | "playing") {
+  private setStatus(status: BotStatus) {
     this.status = status;
     this.onStatusChange?.(this, status);
   }
@@ -127,6 +127,14 @@ export class GameBot {
 
     this.ws.on("close", (code, reason) => {
       console.log(`[${this.name}] Disconnected: ${code} ${reason.toString()}`);
+      // console.log(`[${this.username}] Disconnected from server`);
+      // this.updateStatus("idle");
+
+      // try reconnect after delay
+      // setTimeout(() => {
+      //   // this.refreshSession(); // or login again if session invalid
+      //   this.connectToGame(true);
+      // }, 5000);
       // this.connectToGame(false);
     });
 
