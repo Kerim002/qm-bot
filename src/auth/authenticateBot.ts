@@ -131,7 +131,9 @@ export async function basicLogin(
       );
 
       if (attempt >= maxRetries) {
-        throw new Error(`[basicLogin] Failed after ${maxRetries} attempts`);
+        throw new Error(
+          `[basicLogin] [${payload.username}] Failed after ${maxRetries} attempts`
+        );
       }
 
       // wait before retrying
