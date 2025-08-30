@@ -77,7 +77,6 @@ export class BotManager {
   private ensurePersistFileExists() {
     const dir = path.dirname(PERSIST_FILE);
 
-    // Create directory if missing
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
