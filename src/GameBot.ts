@@ -171,6 +171,7 @@ export class GameBot {
       this.connectToGame(true);
     } catch (err) {
       console.error(`[${this.name}] Failed to connect to game`, err);
+      this.setStatus("idle");
     }
   }
 
