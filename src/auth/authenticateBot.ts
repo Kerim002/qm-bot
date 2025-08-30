@@ -125,14 +125,14 @@ export async function basicLogin(
     } catch (err) {
       attempt++;
       console.log(
-        `[basicLogin] Attempt ${attempt} failed: ${
+        `[basicLogin]  Attempt ${attempt} failed:  ${
           err instanceof Error ? err.message : err
-        }`
+        } [${payload.username}]`
       );
 
       if (attempt >= maxRetries) {
         throw new Error(
-          `[basicLogin] [${payload.username}] Failed after ${maxRetries} attempts`
+          `[basicLogin]  Failed after ${maxRetries} attempts [${payload.username}]`
         );
       }
 
