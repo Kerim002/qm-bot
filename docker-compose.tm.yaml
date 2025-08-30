@@ -1,0 +1,21 @@
+services:
+  bot:
+    image: qm-bot
+    container_name: qm-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      ACTIVE_BOTS_FILE: /app/data/active-bots.json
+    volumes:
+      - bot-data:/app/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  bot-data:
+    driver: local

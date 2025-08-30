@@ -113,15 +113,31 @@ export class MessageHandler {
           }
         }
 
+      // case "error":
+      //   console.log("error");
+      //   if (message.type === "error") {
+      //     console.table(message);
+      //     // console.log("message key", message.key);
+      //     console.log("message.error.key", message.error.key);
+      //     if (message.key === "AUTH_SESSION_EXPIRED") {
+      //       this.makeAuth();
+      //     } else if (message.key === "GAME_NOT_FOUND_TO_RECONNECTION") {
+      //       this.onConnectGame(false);
+      //     } else if (message.key === "MATCHMAKING_TIMEOUT") {
+      //       this.onConnectGame(false);
+      //     }
+      //   }
+      //   break;
+
       case "error":
         console.log("error");
         if (message.type === "error") {
-          console.log("message key", message.key);
-          if (message.key === "AUTH_SESSION_EXPIRED") {
+          console.log("message key", message.error.key);
+          if (message.error.key === "AUTH_ERROR") {
             this.makeAuth();
-          } else if (message.key === "GAME_NOT_FOUND_TO_RECONNECTION") {
+          } else if (message.error.key === "GAME_NOT_FOUND_TO_RECONNECTION") {
             this.onConnectGame(false);
-          } else if (message.key === "MATCHMAKING_TIMEOUT") {
+          } else if (message.error.key === "MATCHMAKING_TIMEOUT") {
             this.onConnectGame(false);
           }
         }

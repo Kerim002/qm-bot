@@ -29,19 +29,20 @@ export interface JoinedMessage {
 
 export interface ErrorMessage {
   type: "error";
-  key:
-    | "MATCHMAKING_TIMEOUT"
-    | "AUTH_SESSION_EXPIRED"
-    | "GAME_NOT_FOUND_TO_RECONNECTION";
-  message: string;
-  // error: {
-  //   key:
-  //     | "MATCHMAKING_TIMEOUT"
-  //     | "AUTH_SESSION_EXPIRED"
-  //     | "GAME_NOT_FOUND_TO_RECONNECTION";
-  //   message: string;
-  //   timestamp: string;
-  // };
+  // key:
+  //   | "MATCHMAKING_TIMEOUT"
+  //   | "AUTH_SESSION_EXPIRED"
+  //   | "GAME_NOT_FOUND_TO_RECONNECTION";
+  // message: string;
+  error: {
+    key:
+      | "MATCHMAKING_TIMEOUT"
+      | "AUTH_ERROR"
+      | "GAME_NOT_FOUND_TO_RECONNECTION"
+      | "DOMAIN_ERROR";
+    message: string;
+    timestamp: string;
+  };
 }
 
 export interface RecconnectedMessage {

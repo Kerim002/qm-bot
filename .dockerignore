@@ -3,9 +3,10 @@ node_modules
 dist
 
 # local env / logs / editor stuff
-.env
+# .env
 npm-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .vscode
 .DS_Store
+*.tar

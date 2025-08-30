@@ -111,7 +111,9 @@ export class GameBot {
 
     this.ws.on("open", () => {
       console.log(
-        `[${this.name}] Connected to game${reconnect ? " (reconnected)" : ""}`
+        `[${this.name}] Connected to game${
+          reconnect ? " (reconnected)" : "connected"
+        }`
       );
       // this.setStatus("playing");
     });
@@ -133,6 +135,7 @@ export class GameBot {
       // try reconnect after delay
       // setTimeout(() => {
       //   // this.refreshSession(); // or login again if session invalid
+      //   console.log("recconnect");
       //   this.connectToGame(true);
       // }, 5000);
       // this.connectToGame(false);
