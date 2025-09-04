@@ -57,7 +57,7 @@ export class MessageHandler {
         this.handlePlayerHealed(message.output);
         break;
 
-      case "game_over":
+      case "game_ended":
         console.log(`Game over. Winner: ${message.output.winner}`);
         this.gameState.reset();
         this.onGameOver();
@@ -130,7 +130,6 @@ export class MessageHandler {
       //   break;
 
       case "error":
-        console.log("error");
         if (message.type === "error") {
           console.log("message key", message.error.key);
           if (message.error.key === "AUTH_ERROR") {
@@ -139,6 +138,8 @@ export class MessageHandler {
             this.onConnectGame(false);
           } else if (message.error.key === "MATCHMAKING_TIMEOUT") {
             this.onConnectGame(false);
+          } else if (message.error.key === "PLAYER_ALREADY_IN_GAME") {
+            this.onConnectGame(true);
           }
         }
         break;

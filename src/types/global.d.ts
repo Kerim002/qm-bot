@@ -7,7 +7,7 @@ export interface Board {
   opponentOP: number;
   myCenters: OccupiedPosition[];
   opponentCenters: OccupiedPosition[];
-  level?: "high" | "middle" | "low";
+  level: "high" | "middle" | "low";
 }
 
 export interface PathNode {

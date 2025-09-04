@@ -128,7 +128,14 @@ export class GameBot {
     });
 
     this.ws.on("close", (code, reason) => {
-      console.log(`[${this.name}] Disconnected: ${code} ${reason.toString()}`);
+      if (code === 1012) {
+        this.connectToGame();
+      } else if (code === 1006) {
+        console.log(
+          `[${this.name}] Disconnected: ${code} ${reason.toString()}`
+        );
+        this.connectWithRetry();
+      }
       // console.log(`[${this.username}] Disconnected from server`);
       // this.updateStatus("idle");
 
@@ -168,7 +175,7 @@ export class GameBot {
         (payload: BotStatus) => this.setStatus(payload)
       );
 
-      this.connectToGame(true);
+      this.connectToGame();
     } catch (err) {
       console.error(`[${this.name}] Failed to connect to game`, err);
       this.setStatus("idle");
@@ -181,6 +188,21 @@ export class GameBot {
       this.connectToGame();
     } else {
       await this.loginToGame({ username: this.name, password });
+    }
+  }
+
+  private async connectWithRetry(delay = 10000) {
+    while (true) {
+      try {
+        await this.connectToGame(true);
+        console.log(`[${this.name}] Connected successfully!`);
+        return; // exit the function once connected
+      } catch (err) {
+        console.log(
+          `[${this.name}] Connection failed. Retrying in ${delay / 1000}s...`
+        );
+        await new Promise((r) => setTimeout(r, delay));
+      }
     }
   }
 

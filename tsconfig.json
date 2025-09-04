@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
+     "types": ["node", "jest"],
     "target": "ES2020",
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

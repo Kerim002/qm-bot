@@ -43,6 +43,7 @@ const DEV_PATH = path.join(__dirname, "./data/active-bots.json");
 export const PERSIST_FILE =
   process.env.NODE_ENV === "production" ? FILE : DEV_PATH;
 
+console.log("persist file", PERSIST_FILE);
 export class BotManager {
   private ranges: TrophyRange[] = [];
 
@@ -72,6 +73,10 @@ export class BotManager {
 
     this.ensurePersistFileExists();
     this.loadPersistedBots();
+  }
+
+  private sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private ensurePersistFileExists() {
@@ -148,9 +153,10 @@ export class BotManager {
     return available[idx];
   }
 
-  startBots() {
+  async startBots() {
     for (const range of this.ranges) {
       this.ensureSearchingBot(range);
+      await this.sleep(200);
     }
   }
 

@@ -39,7 +39,8 @@ export interface ErrorMessage {
       | "MATCHMAKING_TIMEOUT"
       | "AUTH_ERROR"
       | "GAME_NOT_FOUND_TO_RECONNECTION"
-      | "DOMAIN_ERROR";
+      | "DOMAIN_ERROR"
+      | "PLAYER_ALREADY_IN_GAME";
     message: string;
     timestamp: string;
   };
@@ -199,7 +200,7 @@ export interface ZoneOccupiedMessage {
 }
 
 export interface GameOverMessage {
-  type: "game_over";
+  type: "game_ended";
   output: {
     game_id: number;
     winner: number;
