@@ -6,14 +6,19 @@ import { MovementService } from "./services/MovementService";
 import { MessageHandler } from "./services/MessageHandler";
 import { GAME_CONFIG, GAME_TIMES } from "./constants/gameConstants";
 import { BotStatus } from "./types/bot";
+import dotenv from "dotenv";
+
 import { getRandomTimeInMs } from "./helpers/getRandomTimeInMs";
+
+dotenv.config();
+
+const botPassword = process.env.BOT_PASSWORD || "test";
 
 export class GameBot {
   private ws?: WebSocket;
   private status: BotStatus = "idle";
   private sessionId: string = "";
   private botId: number = -1;
-  private password?: string;
 
   // Services
   private gameState = new GameState();
@@ -22,25 +27,26 @@ export class GameBot {
     this.gameState,
     this.shopService
   );
-  private messageHandler: MessageHandler;
+  private messageHandler?: MessageHandler;
 
   constructor(
     public name: string,
+    public range: number[],
     private serverUrl: string,
     private onStatusChange?: (bot: GameBot, status: string) => void
   ) {
-    this.messageHandler = new MessageHandler(
-      this.gameState,
-      this.shopService,
-      this.botId,
-      () => this.takeTurn(),
-      () => this.answerQuestion(),
-      () => this.endTurn(),
-      () => this.onGameOver(),
-      (payload: boolean) => this.connectToGame(payload),
-      () => this.relogin(),
-      (payload: BotStatus) => this.setStatus(payload)
-    );
+    // this.messageHandler = new MessageHandler(
+    //   this.gameState,
+    //   this.shopService,
+    //   this.botId,
+    //   () => this.takeTurn(),
+    //   () => this.answerQuestion(),
+    //   () => this.endTurn(),
+    //   () => this.onGameOver(),
+    //   (payload: boolean) => this.connectToGame(payload),
+    //   () => this.relogin(),
+    //   (payload: BotStatus) => this.setStatus(payload)
+    // );
   }
 
   private setStatus(status: BotStatus) {
@@ -69,6 +75,8 @@ export class GameBot {
         input: { item_type: "HEALING_POTION" },
       });
     }
+
+    this.gameState.logAllStates();
 
     // Handle movement
     const nextMove = this.movementService.getNextMove();
@@ -111,8 +119,8 @@ export class GameBot {
 
     this.ws.on("open", () => {
       console.log(
-        `[${this.name}] Connected to game${
-          reconnect ? " (reconnected)" : "connected"
+        `[${this.range[0]}], [${this.name}] Connected to game ${
+          reconnect ? " (reconnected)" : ""
         }`
       );
       // this.setStatus("playing");
@@ -121,7 +129,7 @@ export class GameBot {
     this.ws.on("message", (data) => {
       try {
         const message = JSON.parse(data.toString());
-        this.messageHandler.handleMessage(message);
+        this.messageHandler?.handleMessage(message);
       } catch (err) {
         console.error(`[${this.name}] Invalid message format`, err);
       }
@@ -166,6 +174,8 @@ export class GameBot {
         this.gameState,
         this.shopService,
         this.botId,
+        this.range,
+        this.name,
         () => this.takeTurn(),
         () => this.answerQuestion(),
         () => this.endTurn(),
@@ -182,12 +192,12 @@ export class GameBot {
     }
   }
 
-  async startSearching(password: string) {
+  async startSearching() {
     this.setStatus("searching");
     if (this.botId > 1) {
       this.connectToGame();
     } else {
-      await this.loginToGame({ username: this.name, password });
+      await this.loginToGame({ username: this.name, password: botPassword });
     }
   }
 
@@ -207,17 +217,17 @@ export class GameBot {
   }
 
   private async relogin() {
-    if (!this.password) {
+    if (!botPassword) {
       console.error(`[${this.name}] No password stored, cannot relogin.`);
       return;
     }
     console.log(`[${this.name}] Session expired, relogging in...`);
-    await this.loginToGame({ username: this.name, password: this.password });
+    await this.loginToGame({ username: this.name, password: botPassword });
   }
 
-  async startPlayingPersistent(password: string) {
+  async startPlayingPersistent() {
     this.setStatus("playing");
-    await this.loginToGame({ username: this.name, password });
+    await this.loginToGame({ username: this.name, password: botPassword });
   }
 
   getStatus() {

@@ -1,12 +1,22 @@
+// export const OCCUPATION_CENTERS: [number, number][] = [
+//   [1, 1],
+//   [4, 0],
+//   [7, 1],
+//   [8, 4],
+//   [7, 7],
+//   [4, 8],
+//   [1, 7],
+//   [0, 4],
+// ];
 export const OCCUPATION_CENTERS: [number, number][] = [
   [1, 1],
+  [0, 4],
+  [1, 7],
   [4, 0],
+  [4, 8],
   [7, 1],
   [8, 4],
   [7, 7],
-  [4, 8],
-  [1, 7],
-  [0, 4],
 ];
 
 export const SHOP_AREA = {

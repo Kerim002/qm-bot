@@ -1,3 +1,4 @@
+import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
 import { BotManager } from "./botManager";
 import dotenv from "dotenv";
 // import { MovementService } from "./services/MovementService";
@@ -8,8 +9,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const WS_URL = process.env.WS_URL || "ws://localhost:8000/ws";
-const botPassword = process.env.BOT_PASSWORD || "test";
-const manager = new BotManager(WS_URL, botPassword);
+const manager = new BotManager(WS_URL);
 manager.startBots();
 
 // const boardState: BoardState = {
@@ -34,8 +34,6 @@ manager.startBots();
 //   totalCoin: 5,
 // };
 
-// console.log(bestMove(boardState));
-
 // const boardState = {
 //   blocked: [4, 4],
 //   myPos: [6, 6],
@@ -53,32 +51,23 @@ manager.startBots();
 //   ],
 // };
 
-// const historyRed = [
-//   [3, 5],
-//   [4, 7],
-//   [7, 7],
-//   [7, 4],
-// ];
-// const historyBlue = [
-//   [5, 3],
-//   [5, 0],
-//   [4, 0],
-//   [1, 0],
-// ];
 // const boardState = {
 //   blocked: [4, 4],
-//   myPos: [4, 7],
-//   opponentPos: [5, 3],
-//   myOP: 8,
-//   opponentOP: 3,
+//   myPos: [1, 1],
+//   opponentPos: [1, 5],
+//   myOP: 0,
+//   opponentOP: 6,
 //   myCenters: [
-//     // { pos: [7, 1], opSpent: 4 },
-//     // { pos: [4, 0], opSpent: 4 },
+//     { pos: [0, 4], opSpent: 6 },
+//     { pos: [4, 0], opSpent: 8 },
+//     { pos: [7, 1], opSpent: 4 },
+//     { pos: [1, 1], opSpent: 6 },
 //   ],
 //   opponentCenters: [
-//     // { pos: [8, 4], opSpent: 4 },
-//     // { pos: [7, 7], opSpent: 4 },
-//     // { pos: [4, 8], opSpent: 2 },
+//     { pos: [1, 7], opSpent: 6 },
+//     { pos: [4, 8], opSpent: 6 },
+//     { pos: [7, 7], opSpent: 6 },
+//     { pos: [8, 4], opSpent: 4 },
 //   ],
 // };
 
@@ -87,4 +76,4 @@ manager.startBots();
 // const board = pathfinder.convertArrayBoard(boardState);
 // const bestPath = pathfinder.getBestPath(board);
 
-// console.log(bestPath);
+// console.log("besrpath", bestPath);

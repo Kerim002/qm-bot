@@ -9,6 +9,8 @@ export class MessageHandler {
     private gameState: GameState,
     private shopService: ShopService,
     private botId: number,
+    private range: number[],
+    private botName: string,
     private onTurnStart: () => void,
     private onQuestionAsked: () => void,
     private onEndTurn: () => void,
@@ -25,6 +27,7 @@ export class MessageHandler {
 
       case "game_started":
         this.setStatus("playing");
+        this.gameState.updateMaxHp(message.output.players[0].max_hp);
         this.gameState.updatePlayers(message.output.players, this.botId);
         this.gameState.shopItems = message.output.shop_items;
         break;
@@ -69,22 +72,25 @@ export class MessageHandler {
 
       case "answer_result":
         console.log("Answer result");
-        console.table(message.output);
+        // console.table(message.output);
         break;
 
       case "player_reconnected":
         if (this.botId === message.output.player_id) {
           console.log("reconnecting");
+          this.gameState.updateMaxHp(message.output.players[0].max_hp);
           this.gameState.updatePlayers(message.output.players, this.botId);
+          console.log("reconnect table");
+          console.table(message.output.zones);
           filterZones(message.output.zones).forEach((item) => {
             if (item.occupant_id === this.botId) {
-              this.gameState.updateOccupation(
+              this.gameState.updateOccupationOnRecconnect(
                 item.position,
                 true,
                 item.occupation_points
               );
             } else if (item.occupant_id) {
-              this.gameState.updateOccupation(
+              this.gameState.updateOccupationOnRecconnect(
                 item.position,
                 false,
                 item.occupation_points
@@ -113,6 +119,14 @@ export class MessageHandler {
           }
         }
 
+        break;
+
+      case "zone_occupation_attempted":
+        // console.table(message.output);
+        this.gameState.updateOccupation(message.output);
+        console.table(message.output);
+        break;
+
       // case "error":
       //   console.log("error");
       //   if (message.type === "error") {
@@ -131,7 +145,7 @@ export class MessageHandler {
 
       case "error":
         if (message.type === "error") {
-          console.log("message key", message.error.key);
+          console.log([this.range[0]], this.botName, message.error.key);
           if (message.error.key === "AUTH_ERROR") {
             this.makeAuth();
           } else if (message.error.key === "GAME_NOT_FOUND_TO_RECONNECTION") {
@@ -144,8 +158,7 @@ export class MessageHandler {
         }
         break;
       default:
-        console.log(`Unhandled message type: ${message.type} `);
-
+        console.log(`Unhandled message type: ${message} `);
         break;
     }
   }
@@ -170,7 +183,11 @@ export class MessageHandler {
       this.gameState.opponent.position = lastPosition;
     }
 
-    this.gameState.updateOccupation(lastPosition, isBot, output.power_points);
+    // this.gameState.updateOccupationOnRecconnect(
+    //   lastPosition,
+    //   isBot,
+    //   output.power_points
+    // );
   }
 
   private handleItemBought(output: any) {

@@ -51,7 +51,7 @@ export interface RecconnectedMessage {
   output: {
     game_id: string;
     player_id: number;
-    players: PlayerSchema[];
+    players: (PlayerSchema & { max_hp: number })[];
     zones: ZoneSchema[];
     shop_items: ShopItemsSchema[];
     inventory: {
@@ -79,7 +79,7 @@ export interface RecconnectedMessage {
 
 export interface ZoneSchema {
   block: number;
-  occupant_id: null;
+  occupant_id: null | number;
   occupation_points: number;
   subject_id: number | null;
   subject_name: string | null;
@@ -98,7 +98,7 @@ export interface ItemBought {
 export interface GameStartedMessage {
   type: "game_started";
   output: {
-    players: PlayerSchema[];
+    players: (PlayerSchema & { max_hp: number })[];
     zones: {
       block: number;
       subject_id: number | null;
@@ -189,14 +189,7 @@ export interface MovedOutput {
 
 export interface ZoneOccupiedMessage {
   type: "zone_occupation_attempted";
-  output: {
-    game_id: string;
-    player_id: number;
-    id: number;
-    subject_id: number;
-    occupation_points: number;
-    occupied_by: number | null;
-  };
+  output: ZoneSchema;
 }
 
 export interface GameOverMessage {

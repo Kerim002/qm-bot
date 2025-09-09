@@ -4,9 +4,7 @@ import { ZoneSchema } from "../types/game";
 export const filterZones = (
   array: ZoneSchema[]
 ): (ZoneSchema & { position: number[] })[] => {
-  const filterBlocks = array.filter(
-    (item) => item.subject_id && item.subject_name
-  );
+  const filterBlocks = array.filter((item) => item.subject_id);
 
   const adjustBlocks: (ZoneSchema & { position: number[] })[] =
     filterBlocks.map((item) => {

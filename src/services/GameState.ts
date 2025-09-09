@@ -1,5 +1,11 @@
 import { OCCUPATION_CENTERS } from "../constants/gameConstants";
-import { OccupiedPosition, PlayerSchema, ShopItemsSchema } from "../types/game";
+import { filterZones } from "../helpers/filterZones";
+import {
+  OccupiedPosition,
+  PlayerSchema,
+  ShopItemsSchema,
+  ZoneSchema,
+} from "../types/game";
 
 export class GameState {
   public bot?: PlayerSchema;
@@ -8,6 +14,7 @@ export class GameState {
   public opponentOccupiedPositions: OccupiedPosition[] = [];
   public shopItems: ShopItemsSchema = {};
   public inventory: string[] = [];
+  public maxHp: number = 0;
 
   reset() {
     this.bot = undefined;
@@ -22,7 +29,46 @@ export class GameState {
     this.opponent = players.find((p) => p.id !== botId);
   }
 
-  updateOccupation(position: number[], isBot: boolean, opSpent: number) {
+  updateMaxHp(hp: number) {
+    this.maxHp = hp;
+  }
+
+  updateOccupation(payload: ZoneSchema) {
+    const takePosition = filterZones([payload])[0];
+    const occupandId = takePosition.occupant_id;
+    const occupiedPosition = takePosition.position;
+    const occupationPoints = takePosition.occupation_points;
+
+    if (!occupandId) return;
+
+    const newItem: OccupiedPosition = {
+      opSpent: occupationPoints,
+      pos: occupiedPosition,
+    };
+
+    console.log("newOccupation", newItem);
+
+    const isSamePos = (a: number[], b: number[]) =>
+      a.length === b.length && a.every((v, i) => v === b[i]);
+    this.botOccupiedPositions = this.botOccupiedPositions.filter(
+      (item) => !isSamePos(item.pos, occupiedPosition)
+    );
+    this.opponentOccupiedPositions = this.opponentOccupiedPositions.filter(
+      (item) => !isSamePos(item.pos, occupiedPosition)
+    );
+
+    if (this.bot?.id === occupandId) {
+      this.botOccupiedPositions.push(newItem);
+    } else if (this.opponent?.id) {
+      this.opponentOccupiedPositions.push(newItem);
+    }
+  }
+
+  updateOccupationOnRecconnect(
+    position: number[],
+    isBot: boolean,
+    opSpent: number
+  ) {
     const isOccupationCenter = OCCUPATION_CENTERS.some(
       ([x, y]) => x === position[0] && y === position[1]
     );
@@ -76,5 +122,18 @@ export class GameState {
 
   hasItem(item: string): boolean {
     return this.inventory.includes(item);
+  }
+
+  logAllStates() {
+    console.log("bot occupied postions");
+    console.table(this.botOccupiedPositions);
+    console.log("opponent occupied postions");
+    console.table(this.opponentOccupiedPositions);
+    console.log("max_heal", this.maxHp);
+    console.log("inventory", this.inventory);
+    console.log("bot");
+    console.table(this.bot);
+    console.log("oppoennt");
+    console.table(this.opponent);
   }
 }

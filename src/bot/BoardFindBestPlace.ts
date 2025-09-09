@@ -307,9 +307,11 @@ export class BoardGamePathfinder {
         3
       );
 
+      console.log("find shortes path", path, center);
+
       let strategy = evaluation.type;
 
-      if (path) {
+      if (path && path.length) {
         const pathPoints = path.length;
         const totalPointsAfterMove = myOP + pathPoints;
         const canCapture =
@@ -339,6 +341,8 @@ export class BoardGamePathfinder {
           blockedPositions,
           opponentBlockedArea
         );
+
+        console.log("find toward path", path);
         // console.log("pathes", path, center, "\n ");
 
         if (path) {

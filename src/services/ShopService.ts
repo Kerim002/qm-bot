@@ -19,7 +19,7 @@ export class ShopService {
     const { bot, opponent } = this.gameState;
     if (!bot || !opponent) return false;
 
-    const needsHealing = bot.hp < GAME_CONFIG.HEAL_THRESHOLD;
+    const needsHealing = bot.hp < this.gameState.maxHp / 5;
     const hasEnoughCoins =
       bot.coins > this.gameState.shopItems["HEALING_POTION"]?.price;
 
@@ -31,11 +31,11 @@ export class ShopService {
 
   canBuyHealingPotion(): boolean {
     const { bot } = this.gameState;
-    if (!bot) return false;
+    if (!bot || this.gameState.inventory.length === 4) return false;
 
     return (
       this.isInShopArea(bot.position) &&
-      bot.hp < GAME_CONFIG.MAX_HEAL_THRESHOLD &&
+      bot.hp < this.gameState.maxHp / 2 &&
       bot.coins > this.gameState.shopItems["HEALING_POTION"]?.price
     );
   }

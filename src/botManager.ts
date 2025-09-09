@@ -43,33 +43,34 @@ const DEV_PATH = path.join(__dirname, "./data/active-bots.json");
 export const PERSIST_FILE =
   process.env.NODE_ENV === "production" ? FILE : DEV_PATH;
 
-console.log("persist file", PERSIST_FILE);
+// console.log(PERSIST_FILE);
 export class BotManager {
   private ranges: TrophyRange[] = [];
 
-  constructor(private wsUrl: string, private password: string) {
-    this.ranges = BOT_RANGES.map((r) => ({
-      ...r,
-      activeNames: new Set(),
-      bots: new Map(),
-    }));
+  constructor(private wsUrl: string) {
+    // this.ranges = BOT_RANGES.map((r) => ({
+    //   ...r,
+    //   activeNames: new Set(),
+    //   bots: new Map(),
+    // }));
 
-    // this.ranges = [
-    //   {
-    //     activeNames: new Set(),
-    //     bots: new Map(),
-    //     max: 0,
-    //     min: 500,
-    //     names: ["PixelSeeker", "KingLingo"],
-    //   },
-    //   {
-    //     activeNames: new Set(),
-    //     bots: new Map(),
-    //     max: 12000,
-    //     min: 11500,
-    //     names: ["smartpro", "Cool_bird"],
-    //   },
-    // ];
+    this.ranges = [
+      {
+        activeNames: new Set(),
+        bots: new Map(),
+        max: 0,
+        min: 500,
+        // names: ["PixelSeeker", "KingLingo"],
+        names: ["PixelSeeker"],
+      },
+      {
+        activeNames: new Set(),
+        bots: new Map(),
+        max: 11500,
+        min: 11000,
+        names: ["MARKJACKSON"],
+      },
+    ];
 
     this.ensurePersistFileExists();
     this.loadPersistedBots();
@@ -123,23 +124,29 @@ export class BotManager {
         const range = this.ranges.find(
           (r) => r.min === botInfo.rangeMin && r.max === botInfo.rangeMax
         );
+
         if (!range) continue;
 
         range.activeNames.add(botInfo.name);
 
-        const bot = new GameBot(botInfo.name, this.wsUrl, (bot, status) => {
-          console.log(`[${range.min}-${range.max}] ${bot.name} -> ${status}`);
-          if (status === "playing") this.persistActiveBots();
-          if (status === "idle") {
-            range.activeNames.delete(bot.name);
-            range.bots.delete(bot.name);
-            this.persistActiveBots();
-            setTimeout(() => this.ensureSearchingBot(range), 2000);
+        const bot = new GameBot(
+          botInfo.name,
+          [range.min, range.max],
+          this.wsUrl,
+          (bot, status) => {
+            console.log(`[${range.min}-${range.max}] ${bot.name} -> ${status}`);
+            if (status === "playing") this.persistActiveBots();
+            if (status === "idle") {
+              range.activeNames.delete(bot.name);
+              range.bots.delete(bot.name);
+              this.persistActiveBots();
+              setTimeout(() => this.ensureSearchingBot(range), 2000);
+            }
           }
-        });
+        );
 
         range.bots.set(botInfo.name, bot);
-        bot.startPlayingPersistent(this.password);
+        bot.startPlayingPersistent();
       }
     } catch (err) {
       console.error("Failed to load persisted bots:", err);
@@ -176,23 +183,28 @@ export class BotManager {
 
     range.activeNames.add(username);
 
-    const bot = new GameBot(username, this.wsUrl, (bot, status) => {
-      console.log(`[${range.min}-${range.max}] ${bot.name} -> ${status}`);
+    const bot = new GameBot(
+      username,
+      [range.min, range.max],
+      this.wsUrl,
+      (bot, status) => {
+        // console.log(`[${range.min}-${range.max}] ${bot.name} -> ${status}`);
 
-      if (status === "playing") {
-        this.persistActiveBots();
-        this.ensureSearchingBot(range);
-      }
+        if (status === "playing") {
+          this.persistActiveBots();
+          this.ensureSearchingBot(range);
+        }
 
-      if (status === "idle") {
-        range.activeNames.delete(bot.name);
-        range.bots.delete(bot.name);
-        this.persistActiveBots();
-        setTimeout(() => this.ensureSearchingBot(range), 2000);
+        if (status === "idle") {
+          range.activeNames.delete(bot.name);
+          range.bots.delete(bot.name);
+          this.persistActiveBots();
+          setTimeout(() => this.ensureSearchingBot(range), 2000);
+        }
       }
-    });
+    );
 
     range.bots.set(username, bot);
-    bot.startSearching(this.password);
+    bot.startSearching();
   }
 }
