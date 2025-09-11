@@ -4,6 +4,7 @@ import { evaluateCenter } from "../helpers/evaluateCenter";
 import { getAdjacentPositions } from "../helpers/getAdjacentPositions";
 import { getLevelMultipliers } from "../helpers/getLevelMultipliers";
 import { getOpponentBlockedArea } from "../helpers/getOpponentBlockedArea";
+import { horsePlacesScore } from "../helpers/horsePlacesScore";
 import { isBlocked } from "../helpers/isBlocked";
 import { positionsEqual } from "../helpers/positionsEqual";
 import { OCCUPATION_CENTERS } from "../shared/contstants/constants";
@@ -103,10 +104,10 @@ export class BoardGamePathfinder {
 
       // Add some variation based on position to break ties
       score += (endPos.x + endPos.y) % 7; // Small position-based variation
-
+      score += horsePlacesScore(endPos);
       // Bonus for different strategic positions
-      if (endPos.x === 6 && endPos.y === 3) score += 15; // Specific bonus for [6,3]
-      if (endPos.x === 7 && endPos.y === 4) score += 10; // Smaller bonus for [7,4]
+      // if (endPos.x === 6 && endPos.y === 3) score += 15; // Specific bonus for [6,3]
+      // if (endPos.x === 7 && endPos.y === 4) score += 10; // Smaller bonus for [7,4]
 
       // Small randomization to break remaining ties
       score += Math.random() * 20;
@@ -310,13 +311,11 @@ export class BoardGamePathfinder {
       console.log("find shortes path", path, center);
 
       let strategy = evaluation.type;
-
-      if (path && path.length) {
-        const pathPoints = path.length;
-        const totalPointsAfterMove = myOP + pathPoints;
-        const canCapture =
-          totalPointsAfterMove >= (evaluation.requiredPoints || 1);
-
+      const pathPoints = path ? path.length : 0;
+      const totalPointsAfterMove = myOP + pathPoints;
+      const canCapture =
+        totalPointsAfterMove >= (evaluation.requiredPoints || 1);
+      if (path && path.length && canCapture) {
         let score = evaluation.priority * levelMultipliers.aggression;
 
         if (canCapture) {

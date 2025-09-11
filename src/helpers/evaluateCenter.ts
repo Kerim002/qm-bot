@@ -36,7 +36,7 @@ export function evaluateCenter(
         break;
       case "low":
         priority = 100;
-        requiredPoints = opponentOwned.opSpent + 2; // slightly higher for low
+        requiredPoints = opponentOwned.opSpent + 1; // slightly higher for low
         break;
     }
 

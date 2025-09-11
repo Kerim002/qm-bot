@@ -1,16 +1,17 @@
 import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
 import { BotManager } from "./botManager";
 import dotenv from "dotenv";
+import { Position } from "./types/global";
 // import { MovementService } from "./services/MovementService";
 // import { GameState } from "./services/GameState";
 // import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
 // import { bestMove, BoardState } from "./tests/best-move-test";
 
-// dotenv.config();
+dotenv.config();
 
-// const WS_URL = process.env.WS_URL || "ws://localhost:8000/ws";
-// const manager = new BotManager(WS_URL);
-// manager.startBots();
+const WS_URL = process.env.WS_URL || "ws://localhost:8000/ws";
+const manager = new BotManager(WS_URL);
+manager.startBots();
 
 // const boardState: BoardState = {
 //   blocked: [4, 4],
@@ -51,22 +52,22 @@ import dotenv from "dotenv";
 //   ],
 // };
 
-const boardState = {
-  blocked: [4, 4],
-  myPos: [4, 0],
-  opponentPos: [5, 5],
-  myOP: 0,
-  opponentOP: 3,
-  myCenters: [{ pos: [4, 0], opSpent: 6 }],
-  opponentCenters: [
-    { pos: [7, 1], opSpent: 8 },
-    { pos: [8, 4], opSpent: 8 },
-  ],
-};
+// const boardState = {
+//   blocked: [4, 4],
+//   myPos: [2, 6],
+//   opponentPos: [6, 3],
+//   myOP: 0,
+//   opponentOP: 3,
+//   myCenters: [
+//     { pos: [4, 8], opSpent: 4 },
+//     { pos: [7, 7], opSpent: 2 },
+//   ],
+//   opponentCenters: [{ pos: [8, 4], opSpent: 6 }],
+// };
 
-const pathfinder = new BoardGamePathfinder();
+// const pathfinder = new BoardGamePathfinder();
 
-const board = pathfinder.convertArrayBoard(boardState);
-const bestPath = pathfinder.getBestPath(board);
+// const board = pathfinder.convertArrayBoard(boardState);
+// const bestPath = pathfinder.getBestPath(board);
 
-console.log("bestpath", bestPath);
+// console.log("bestpath", bestPath);
