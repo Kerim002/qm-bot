@@ -176,7 +176,7 @@ export class BotManager {
 
     const username = this.getRandomAvailableName(range);
     if (!username) {
-      logger.warning(
+      logger.warn(
         `[BotManager][${range.min}-${range.max}] ⚠️ All names used, waiting...`
       );
       return;
