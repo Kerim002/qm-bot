@@ -46,7 +46,7 @@ export class GameState {
       pos: occupiedPosition,
     };
 
-    console.log("newOccupation", newItem);
+    // console.log("newOccupation", newItem);
 
     const isSamePos = (a: number[], b: number[]) =>
       a.length === b.length && a.every((v, i) => v === b[i]);
@@ -125,15 +125,15 @@ export class GameState {
   }
 
   logAllStates() {
-    console.log("bot occupied postions");
-    console.table(this.botOccupiedPositions);
-    console.log("opponent occupied postions");
-    console.table(this.opponentOccupiedPositions);
-    console.log("max_heal", this.maxHp);
-    console.log("inventory", this.inventory);
-    console.log("bot");
-    console.table(this.bot);
-    console.log("oppoennt");
-    console.table(this.opponent);
+    // console.log("bot occupied postions");
+    // console.table(this.botOccupiedPositions);
+    // console.log("opponent occupied postions");
+    // console.table(this.opponentOccupiedPositions);
+    // console.log("max_heal", this.maxHp);
+    // console.log("inventory", this.inventory);
+    // console.log("bot");
+    // console.table(this.bot);
+    // console.log("oppoennt");
+    // console.table(this.opponent);
   }
 }

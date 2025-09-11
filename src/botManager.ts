@@ -28,6 +28,7 @@ import path from "path";
 
 import { GameBot } from "./GameBot";
 import { BOT_RANGES } from "./constants/gameConstants";
+import logger from "./utils/logger";
 
 type TrophyRange = {
   min: number;
@@ -58,8 +59,8 @@ export class BotManager {
       {
         activeNames: new Set(),
         bots: new Map(),
-        max: 0,
-        min: 500,
+        max: 500,
+        min: 0,
         // names: ["PixelSeeker", "KingLingo"],
         names: ["PixelSeeker"],
       },
@@ -90,7 +91,7 @@ export class BotManager {
     // Create file if missing
     if (!fs.existsSync(PERSIST_FILE)) {
       fs.writeFileSync(PERSIST_FILE, JSON.stringify([], null, 2), "utf-8");
-      console.log(`[INIT] Created empty active-bots.json at ${PERSIST_FILE}`);
+      logger.info(`[INIT] Created empty active-bots.json at ${PERSIST_FILE}`);
     }
   }
 
@@ -134,7 +135,7 @@ export class BotManager {
           [range.min, range.max],
           this.wsUrl,
           (bot, status) => {
-            console.log(`[${range.min}-${range.max}] ${bot.name} -> ${status}`);
+            // console.log(`[${range.min}-${range.max}] ${bot.name} -> ${status}`);
             if (status === "playing") this.persistActiveBots();
             if (status === "idle") {
               range.activeNames.delete(bot.name);
@@ -175,7 +176,7 @@ export class BotManager {
 
     const username = this.getRandomAvailableName(range);
     if (!username) {
-      console.log(
+      logger.warning(
         `[BotManager][${range.min}-${range.max}] ⚠️ All names used, waiting...`
       );
       return;

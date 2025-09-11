@@ -9,6 +9,7 @@ import { BotStatus } from "./types/bot";
 import dotenv from "dotenv";
 
 import { getRandomTimeInMs } from "./helpers/getRandomTimeInMs";
+import logger from "./utils/logger";
 
 dotenv.config();
 
@@ -118,8 +119,8 @@ export class GameBot {
     });
 
     this.ws.on("open", () => {
-      console.log(
-        `[${this.range[0]}], [${this.name}] Connected to game ${
+      logger.info(
+        `[${this.range[0]}] [${this.name}] Connected to game ${
           reconnect ? " (reconnected)" : ""
         }`
       );
@@ -139,7 +140,7 @@ export class GameBot {
       if (code === 1012) {
         this.connectToGame();
       } else if (code === 1006) {
-        console.log(
+        logger.error(
           `[${this.name}] Disconnected: ${code} ${reason.toString()}`
         );
         this.connectWithRetry();
@@ -157,7 +158,7 @@ export class GameBot {
     });
 
     this.ws.on("error", (err) => {
-      console.error(`[${this.name}] WebSocket error`, err);
+      logger.error(`[${this.name}] WebSocket error`, err);
     });
   }
 
@@ -205,10 +206,10 @@ export class GameBot {
     while (true) {
       try {
         await this.connectToGame(true);
-        console.log(`[${this.name}] Connected successfully!`);
+        logger.info(`[${this.name}] Connected successfully!`);
         return; // exit the function once connected
       } catch (err) {
-        console.log(
+        logger.error(
           `[${this.name}] Connection failed. Retrying in ${delay / 1000}s...`
         );
         await new Promise((r) => setTimeout(r, delay));
@@ -221,7 +222,7 @@ export class GameBot {
       console.error(`[${this.name}] No password stored, cannot relogin.`);
       return;
     }
-    console.log(`[${this.name}] Session expired, relogging in...`);
+    logger.error(`[${this.name}] Session expired, relogging in...`);
     await this.loginToGame({ username: this.name, password: botPassword });
   }
 

@@ -34,7 +34,7 @@ export class MovementService {
     const board = this.pathfinder.convertArrayBoard(boardState);
     const bestPath = this.pathfinder.getBestPath(board);
 
-    console.log("bestpath", bestPath);
+    // console.log("bestpath", bestPath);
 
     if (bestPath && bestPath.length > 0) {
       const target = bestPath[bestPath.length - 1];

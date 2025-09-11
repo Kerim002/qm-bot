@@ -40,7 +40,8 @@ export interface ErrorMessage {
       | "AUTH_ERROR"
       | "GAME_NOT_FOUND_TO_RECONNECTION"
       | "DOMAIN_ERROR"
-      | "PLAYER_ALREADY_IN_GAME";
+      | "PLAYER_ALREADY_IN_GAME"
+      | "GAME_NOT_FOUND";
     message: string;
     timestamp: string;
   };
@@ -196,8 +197,7 @@ export interface GameOverMessage {
   type: "game_ended";
   output: {
     game_id: number;
-    winner: number;
-    total_delta: number;
+    winner_id: number;
   };
 }
 

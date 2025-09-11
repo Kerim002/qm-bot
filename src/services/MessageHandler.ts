@@ -1,6 +1,7 @@
 import { filterZones } from "../helpers/filterZones";
 import { BotStatus } from "../types/bot";
 import { MovedOutput, WSMessage, ZoneSchema } from "../types/game";
+import logger from "../utils/logger";
 import { GameState } from "./GameState";
 import { ShopService } from "./ShopService";
 
@@ -61,26 +62,26 @@ export class MessageHandler {
         break;
 
       case "game_ended":
-        console.log(`Game over. Winner: ${message.output.winner}`);
+        logger.info(`Game over. Winner: ${message.output.winner_id}`);
         this.gameState.reset();
         this.onGameOver();
         break;
 
       case "player_disconnected":
-        console.log("Player disconnected");
+        logger.error("Player disconnected");
         break;
 
       case "answer_result":
-        console.log("Answer result");
+        // console.log("Answer result");
         // console.table(message.output);
         break;
 
       case "player_reconnected":
         if (this.botId === message.output.player_id) {
-          console.log("reconnecting");
+          logger.info("reconnecting");
           this.gameState.updateMaxHp(message.output.players[0].max_hp);
           this.gameState.updatePlayers(message.output.players, this.botId);
-          console.log("reconnect table");
+          // console.log("reconnect table");
           console.table(message.output.zones);
           filterZones(message.output.zones).forEach((item) => {
             if (item.occupant_id === this.botId) {
@@ -124,6 +125,7 @@ export class MessageHandler {
       case "zone_occupation_attempted":
         // console.table(message.output);
         this.gameState.updateOccupation(message.output);
+        logger.info(message.output);
         console.table(message.output);
         break;
 
@@ -145,7 +147,9 @@ export class MessageHandler {
 
       case "error":
         if (message.type === "error") {
-          console.log([this.range[0]], this.botName, message.error.key);
+          logger.error(
+            `[${this.range[0]}], ${this.botName}, ${message.error.key}`
+          );
           if (message.error.key === "AUTH_ERROR") {
             this.makeAuth();
           } else if (message.error.key === "GAME_NOT_FOUND_TO_RECONNECTION") {
@@ -154,11 +158,14 @@ export class MessageHandler {
             this.onConnectGame(false);
           } else if (message.error.key === "PLAYER_ALREADY_IN_GAME") {
             this.onConnectGame(true);
+          } else if (message.error.key === "GAME_NOT_FOUND") {
+            this.onConnectGame(false);
           }
         }
         break;
       default:
-        console.log(`Unhandled message type: ${message} `);
+        console.log(`Unhandled message type: `);
+        console.table(message);
         break;
     }
   }
