@@ -3,18 +3,42 @@ import { filterZones } from "../helpers/filterZones";
 import {
   OccupiedPosition,
   PlayerSchema,
-  ShopItemsSchema,
+  ShopItemSchema,
   ZoneSchema,
 } from "../types/game";
+
+export interface GameStateOptions {
+  bot?: PlayerSchema;
+  opponent?: PlayerSchema;
+  botOccupiedPositions?: OccupiedPosition[];
+  opponentOccupiedPositions?: OccupiedPosition[];
+  shopItems?: {
+    [key: string]: ShopItemSchema;
+  };
+  inventory?: string[];
+  maxHp?: number;
+}
 
 export class GameState {
   public bot?: PlayerSchema;
   public opponent?: PlayerSchema;
   public botOccupiedPositions: OccupiedPosition[] = [];
   public opponentOccupiedPositions: OccupiedPosition[] = [];
-  public shopItems: ShopItemsSchema = {};
+  public shopItems: {
+    [key: string]: ShopItemSchema;
+  } = {};
   public inventory: string[] = [];
   public maxHp: number = 0;
+
+  constructor(options: GameStateOptions = {}) {
+    this.bot = options.bot;
+    this.opponent = options.opponent;
+    this.botOccupiedPositions = options.botOccupiedPositions ?? [];
+    this.opponentOccupiedPositions = options.opponentOccupiedPositions ?? [];
+    this.shopItems = options.shopItems ?? {};
+    this.inventory = options.inventory ?? [];
+    this.maxHp = options.maxHp ?? 0;
+  }
 
   reset() {
     this.bot = undefined;
@@ -39,17 +63,10 @@ export class GameState {
     const occupiedPosition = takePosition.position;
     const occupationPoints = takePosition.occupation_points;
 
-    if (!occupandId) return;
-
-    const newItem: OccupiedPosition = {
-      opSpent: occupationPoints,
-      pos: occupiedPosition,
-    };
-
-    // console.log("newOccupation", newItem);
-
     const isSamePos = (a: number[], b: number[]) =>
       a.length === b.length && a.every((v, i) => v === b[i]);
+
+    // Remove the position from both bot and opponent
     this.botOccupiedPositions = this.botOccupiedPositions.filter(
       (item) => !isSamePos(item.pos, occupiedPosition)
     );
@@ -57,9 +74,18 @@ export class GameState {
       (item) => !isSamePos(item.pos, occupiedPosition)
     );
 
+    // If no occupant, we're done (clears the spot)
+    if (!occupandId) return;
+
+    // Otherwise, add new occupation
+    const newItem: OccupiedPosition = {
+      opSpent: occupationPoints,
+      pos: occupiedPosition,
+    };
+
     if (this.bot?.id === occupandId) {
       this.botOccupiedPositions.push(newItem);
-    } else if (this.opponent?.id) {
+    } else if (this.opponent?.id === occupandId) {
       this.opponentOccupiedPositions.push(newItem);
     }
   }
@@ -125,15 +151,14 @@ export class GameState {
   }
 
   logAllStates() {
-    // console.log("bot occupied postions");
-    // console.table(this.botOccupiedPositions);
-    // console.log("opponent occupied postions");
-    // console.table(this.opponentOccupiedPositions);
-    // console.log("max_heal", this.maxHp);
-    // console.log("inventory", this.inventory);
-    // console.log("bot");
-    // console.table(this.bot);
-    // console.log("oppoennt");
-    // console.table(this.opponent);
+    console.log("bot occupied postions");
+    console.table(this.botOccupiedPositions);
+    console.log("opponent occupied postions");
+    console.table(this.opponentOccupiedPositions);
+    console.log("inventory", this.inventory);
+    console.log("bot");
+    console.table(this.bot);
+    console.log("opponent");
+    console.table(this.opponent);
   }
 }

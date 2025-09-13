@@ -37,6 +37,11 @@ export class MessageHandler {
         this.gameState.updatePlayers(message.output.players, this.botId);
         break;
 
+      case "player_teleported":
+        console.log("Player teleported");
+
+        break;
+
       case "turn_started":
         setTimeout(() => {
           this.handleTurnStart(message.output.player_id);
@@ -125,8 +130,9 @@ export class MessageHandler {
       case "zone_occupation_attempted":
         // console.table(message.output);
         this.gameState.updateOccupation(message.output);
-        logger.info(message.output);
-        console.table(message.output);
+        // console.log("zone occupied attemted");
+        // console.table(message.output);
+        // console.table(message.output);
         break;
 
       // case "error":
@@ -147,7 +153,7 @@ export class MessageHandler {
 
       case "error":
         if (message.type === "error") {
-          logger.error(
+          logger.warn(
             `[${this.range[0]}], ${this.botName}, ${message.error.key}`
           );
           if (message.error.key === "AUTH_ERROR") {
@@ -165,7 +171,7 @@ export class MessageHandler {
         break;
       default:
         console.log(`Unhandled message type: `);
-        console.table(message);
+        // console.table(message);
         break;
     }
   }

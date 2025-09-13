@@ -130,7 +130,7 @@ export class GameBot {
     this.ws.on("message", (data) => {
       try {
         const message = JSON.parse(data.toString());
-        console.log(message);
+        // console.log(message);
         this.messageHandler?.handleMessage(message);
       } catch (err) {
         console.error(`[${this.name}] Invalid message format`, err);

@@ -56,14 +56,14 @@ export class BotManager {
     // }));
 
     this.ranges = [
-      {
-        activeNames: new Set(),
-        bots: new Map(),
-        max: 500,
-        min: 0,
-        // names: ["PixelSeeker", "KingLingo"],
-        names: ["PixelSeeker"],
-      },
+      // {
+      //   activeNames: new Set(),
+      //   bots: new Map(),
+      //   max: 500,
+      //   min: 0,
+      //   // names: ["PixelSeeker", "KingLingo"],
+      //   names: ["PixelSeeker"],
+      // },
       {
         activeNames: new Set(),
         bots: new Map(),

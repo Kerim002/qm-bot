@@ -10,7 +10,7 @@ export const horsePlacesScore = ({ x, y }: Position) => {
     (x === 1 || x === 4 || x === 7) &&
     (y === 1 || y === 4 || y === 7)
   ) {
-    return 25;
+    return 20;
   } else {
     return 0;
   }

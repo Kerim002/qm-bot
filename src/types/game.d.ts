@@ -15,7 +15,8 @@ export type WSMessage =
   | ItemBought
   | PlayerHealed
   | RecconnectedMessage
-  | ErrorMessage;
+  | ErrorMessage
+  | PlayerTeleportedMessage;
 
 export interface JoinedMessage {
   type: "player_joined";
@@ -54,7 +55,9 @@ export interface RecconnectedMessage {
     player_id: number;
     players: (PlayerSchema & { max_hp: number })[];
     zones: ZoneSchema[];
-    shop_items: ShopItemsSchema[];
+    shop_items: {
+      [key: string]: ShopItemSchema;
+    };
     inventory: {
       [key: string]: number;
     };
@@ -108,9 +111,7 @@ export interface GameStartedMessage {
       occupation_points: number;
     }[];
     shop_items: {
-      HEALING_POTION: ShopItemSchema;
-      TELEPORT_STONE: ShopItemSchema;
-      LUCKY_CHARM: ShopItemSchema;
+      [key: string]: ShopItemSchema;
     };
   };
 }
@@ -175,6 +176,15 @@ export interface AnswerResultMessage {
   };
 }
 
+export interface PlayerTeleportedMessage {
+  type: "player_teleported";
+  output: {
+    game_id: string;
+    player_id: number;
+    teleported_position: number[];
+  };
+}
+
 export interface MovedMessage {
   type: "player_moved";
   output: MovedOutput;
@@ -213,16 +223,6 @@ export interface PlayerSchema {
 export interface PlayerDisconnected {
   type: "player_disconnected";
 }
-
-export type ShopItemSchema = {
-  name: string;
-  description: string;
-  price: number;
-};
-
-export type ShopItemsSchema = {
-  [key: string]: ShopItem;
-};
 
 export type OccupiedPosition = {
   pos: number[];

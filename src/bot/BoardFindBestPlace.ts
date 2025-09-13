@@ -308,7 +308,7 @@ export class BoardGamePathfinder {
         3
       );
 
-      console.log("find shortes path", path, center);
+      // console.log("find shortes path", path, center);
 
       let strategy = evaluation.type;
       const pathPoints = path ? path.length : 0;
@@ -341,7 +341,7 @@ export class BoardGamePathfinder {
           opponentBlockedArea
         );
 
-        console.log("find toward path", path);
+        // console.log("find toward path", path);
         // console.log("pathes", path, center, "\n ");
 
         if (path) {

@@ -19,7 +19,7 @@ const logger = createLogger({
   format: format.combine(
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     customFormat,
-    format.colorize({ all: true, level: true }) // Move colorize after customFormat
+    format.colorize({ all: true, level: true })
   ),
   transports: [new transports.Console()],
 });
