@@ -5,12 +5,12 @@ export const horsePlacesScore = ({ x, y }: Position) => {
     (x === 2 || x === 3 || x === 5 || x === 6) &&
     (y === 2 || y === 3 || y === 5 || y === 6)
   ) {
-    return 50;
+    return 55;
   } else if (
     (x === 1 || x === 4 || x === 7) &&
     (y === 1 || y === 4 || y === 7)
   ) {
-    return 20;
+    return 10;
   } else {
     return 0;
   }

@@ -1,5 +1,9 @@
 import { BotManager } from "./botManager";
 import dotenv from "dotenv";
+import { OccupiedPosition, PlayerSchema, ShopItemSchema } from "./types/game";
+import { GameState } from "./services/GameState";
+import { ShopService } from "./services/ShopService";
+import { MovementService } from "./services/MovementService";
 
 // import { MovementService } from "./services/MovementService";
 // import { GameState } from "./services/GameState";
@@ -37,21 +41,21 @@ manager.startBots();
 // console.log("bestpath", bestPath);
 
 // const bot: PlayerSchema = {
-//   coins: 50,
-//   hp: 4,
+//   coins: 220,
+//   hp: 37,
 //   id: 1,
 //   name: "bot",
-//   position: [1, 4],
+//   position: [7, 7],
 //   power_points: 3,
 // };
 
 // const opponent: PlayerSchema = {
-//   coins: 50,
-//   hp: 11,
+//   coins: 185,
+//   hp: 38,
 //   id: 2,
 //   name: "user",
-//   position: [3, 3],
-//   power_points: 10,
+//   position: [4, 7],
+//   power_points: 0,
 // };
 
 // const shopItems: {
@@ -65,14 +69,15 @@ manager.startBots();
 // };
 
 // const botOccupiedPosition: OccupiedPosition[] = [
-//   { pos: [4, 0], opSpent: 4 },
+//   { pos: [4, 0], opSpent: 8 },
 //   { pos: [7, 1], opSpent: 6 },
-//   { pos: [8, 4], opSpent: 6 },
-//   { pos: [7, 1], opSpent: 4 },
+//   { pos: [7, 7], opSpent: 6 },
 // ];
 // const opponentOccupiedPosition: OccupiedPosition[] = [
-//   { pos: [0, 4], opSpent: 6 },
+//   { pos: [8, 4], opSpent: 6 },
 //   { pos: [4, 8], opSpent: 8 },
+//   { pos: [1, 1], opSpent: 2 },
+//   //   { pos: [1, 7], opSpent: 6 },
 // ];
 // const gameState = new GameState({
 //   bot: bot,

@@ -1,4 +1,4 @@
-type Position = [number, number];
+type Position = number[];
 
 const directions: Position[] = [
   [1, 0],

@@ -6,7 +6,7 @@ import { getBestShopMove } from "../helpers/bestShopPath";
 export class ShopService {
   constructor(private gameState: GameState) {}
 
-  isInShopArea(position: [number, number]): boolean {
+  isInShopArea(position: number[]): boolean {
     return (
       position[0] >= SHOP_AREA.MIN_X &&
       position[0] <= SHOP_AREA.MAX_X &&
@@ -46,6 +46,16 @@ export class ShopService {
       bot &&
         this.gameState.hasItem("HEALING_POTION") &&
         bot.hp < GAME_CONFIG.USE_HEAL_HP
+    );
+  }
+
+  canBuyTeleport(): boolean {
+    const { bot } = this.gameState;
+    if (!bot || this.gameState.inventory.length === 4) return false;
+
+    return (
+      this.isInShopArea(bot.position) &&
+      bot.coins > this.gameState.shopItems["TELEPORT_STONE"]?.price
     );
   }
 }

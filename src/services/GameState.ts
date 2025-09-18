@@ -3,6 +3,7 @@ import { filterZones } from "../helpers/filterZones";
 import {
   OccupiedPosition,
   PlayerSchema,
+  PlayerTeleportSchema,
   ShopItemSchema,
   ZoneSchema,
 } from "../types/game";
@@ -51,6 +52,16 @@ export class GameState {
   updatePlayers(players: PlayerSchema[], botId: number) {
     this.bot = players.find((p) => p.id === botId);
     this.opponent = players.find((p) => p.id !== botId);
+  }
+
+  updatePlayerOnTeleport(payload: PlayerTeleportSchema) {
+    if (this.bot && this.opponent) {
+      if (this.bot.id == payload.player_id) {
+        this.bot.position = payload.teleported_position;
+      } else if (this.opponent.id == payload.player_id) {
+        this.opponent.position == payload.teleported_position;
+      }
+    }
   }
 
   updateMaxHp(hp: number) {

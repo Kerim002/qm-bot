@@ -178,11 +178,13 @@ export interface AnswerResultMessage {
 
 export interface PlayerTeleportedMessage {
   type: "player_teleported";
-  output: {
-    game_id: string;
-    player_id: number;
-    teleported_position: number[];
-  };
+  output: PlayerTeleportSchema;
+}
+
+export interface PlayerTeleportSchema {
+  game_id: string;
+  player_id: number;
+  teleported_position: number[];
 }
 
 export interface MovedMessage {
@@ -214,7 +216,7 @@ export interface GameOverMessage {
 export interface PlayerSchema {
   id: number;
   name: string;
-  position: [number, number];
+  position: number[];
   hp: number;
   coins: number;
   power_points: number;

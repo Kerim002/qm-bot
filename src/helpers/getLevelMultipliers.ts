@@ -5,33 +5,12 @@ export function getLevelMultipliers(
   riskTaking: number;
   efficiency: number;
 } {
-  // switch (level) {
-  //   case "high":
-  //     return {
-  //       aggression: 1.5,
-  //       riskTaking: 1.2,
-  //       efficiency: 1.3,
-  //     };
-  //   case "middle":
-  //     return {
-  //       aggression: 1.0,
-  //       riskTaking: 1.0,
-  //       efficiency: 1.0,
-  //     };
-  //   case "low":
-  //     return {
-  //       aggression: 0.7,
-  //       riskTaking: 0.8,
-  //       efficiency: 0.9,
-  //     };
-  // }
-
   switch (level) {
     case "high":
       return {
-        aggression: 2.5,
+        aggression: 1.5,
         riskTaking: 1.2,
-        efficiency: 1.7,
+        efficiency: 1.3,
       };
     case "middle":
       return {
@@ -46,6 +25,27 @@ export function getLevelMultipliers(
         efficiency: 0.9,
       };
   }
+
+  // switch (level) {
+  //   case "high":
+  //     return {
+  //       aggression: 2.5,
+  //       riskTaking: 1.2,
+  //       efficiency: 1.7,
+  //     };
+  //   case "middle":
+  //     return {
+  //       aggression: 1.0,
+  //       riskTaking: 1.0,
+  //       efficiency: 1.0,
+  //     };
+  //   case "low":
+  //     return {
+  //       aggression: 0.7,
+  //       riskTaking: 0.8,
+  //       efficiency: 0.9,
+  //     };
+  // }
   // switch (level) {
   //   case "high":
   //     return {

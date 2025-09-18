@@ -4,7 +4,7 @@ import { GameState } from "./services/GameState";
 import { ShopService } from "./services/ShopService";
 import { MovementService } from "./services/MovementService";
 import { MessageHandler } from "./services/MessageHandler";
-import { GAME_CONFIG, GAME_TIMES } from "./constants/gameConstants";
+import { GAME_TIMES } from "./constants/gameConstants";
 import { BotStatus } from "./types/bot";
 import dotenv from "dotenv";
 

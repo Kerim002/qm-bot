@@ -38,8 +38,7 @@ export class MessageHandler {
         break;
 
       case "player_teleported":
-        console.log("Player teleported");
-
+        this.gameState.updatePlayerOnTeleport(message.output);
         break;
 
       case "turn_started":
