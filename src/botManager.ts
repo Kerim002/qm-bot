@@ -1,34 +1,9 @@
-// // import { GameBot } from "./bot";
-
-// import { GameBot } from "./GameBot";
-
-// // const bots = ["red", "blue"];
-
-// export class BotManager {
-//   private bots: GameBot[] = [];
-
-//   constructor(private wsUrl: string, private password: string) {}
-
-//   startBots(count: number) {
-//     for (let i = 0; i < count; i++) {
-//       const bot = new GameBot(`Bot ${i}}`, 10, this.wsUrl, (bot, status) => {
-//         console.log(`BotManager: ${i} is now ${status}`);
-//       });
-//       this.bots.push(bot);
-//       setTimeout(
-//         () => bot.loginToGame({ password: this.password, username: "bot000" }),
-//         i * 100
-//       );
-//     }
-//   }
-// }
-
 import fs from "fs";
 import path from "path";
-
 import { GameBot } from "./GameBot";
-import { BOT_RANGES } from "./constants/gameConstants";
 import logger from "./utils/logger";
+import { BOT_RANGES } from "./constants/gameConstants";
+// import { GameBot } from "./tests/test-game-bot";
 
 type TrophyRange = {
   min: number;
@@ -49,29 +24,11 @@ export class BotManager {
   private ranges: TrophyRange[] = [];
 
   constructor(private wsUrl: string) {
-    // this.ranges = BOT_RANGES.map((r) => ({
-    //   ...r,
-    //   activeNames: new Set(),
-    //   bots: new Map(),
-    // }));
-
-    this.ranges = [
-      // {
-      //   activeNames: new Set(),
-      //   bots: new Map(),
-      //   max: 500,
-      //   min: 0,
-      //   // names: ["PixelSeeker", "KingLingo"],
-      //   names: ["PixelSeeker"],
-      // },
-      {
-        activeNames: new Set(),
-        bots: new Map(),
-        max: 11500,
-        min: 11000,
-        names: ["MARKJACKSON"],
-      },
-    ];
+    this.ranges = BOT_RANGES.map((r) => ({
+      ...r,
+      activeNames: new Set(),
+      bots: new Map(),
+    }));
 
     this.ensurePersistFileExists();
     this.loadPersistedBots();

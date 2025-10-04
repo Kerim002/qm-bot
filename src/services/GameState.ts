@@ -101,52 +101,59 @@ export class GameState {
     }
   }
 
-  updateOccupationOnRecconnect(
-    position: number[],
-    isBot: boolean,
-    opSpent: number
-  ) {
-    const isOccupationCenter = OCCUPATION_CENTERS.some(
-      ([x, y]) => x === position[0] && y === position[1]
-    );
+  updateOccupationCenters(zones: ZoneSchema[]) {
+    filterZones(zones).forEach((item) => {
+      if (item.occupant_id == this.bot?.id) {
+        this.opponentOccupiedPositions = this.opponentOccupiedPositions.filter(
+          (pos) =>
+            !(
+              pos.pos[0] === item.position[0] && pos.pos[1] === item.position[1]
+            )
+        );
 
-    if (!isOccupationCenter) return;
+        const existing = this.botOccupiedPositions.find(
+          (pos) =>
+            pos.pos[0] === item.position[0] && pos.pos[1] === item.position[1]
+        );
 
-    if (isBot) {
-      // Remove from opponent's list if present
-      this.opponentOccupiedPositions = this.opponentOccupiedPositions.filter(
-        (pos) => !(pos.pos[0] === position[0] && pos.pos[1] === position[1])
-      );
+        if (existing) {
+          existing.opSpent = Math.min(
+            existing.opSpent + item.occupation_points,
+            10
+          );
+        } else {
+          this.botOccupiedPositions.push({
+            pos: item.position,
+            opSpent: item.occupation_points,
+          });
+        }
+      } else if (item.occupant_id) {
+        this.botOccupiedPositions = this.botOccupiedPositions.filter(
+          (pos) =>
+            !(
+              pos.pos[0] === item.position[0] && pos.pos[1] === item.position[1]
+            )
+        );
 
-      // Add or update bot's list
-      const existing = this.botOccupiedPositions.find(
-        (pos) => pos.pos[0] === position[0] && pos.pos[1] === position[1]
-      );
+        const existing = this.opponentOccupiedPositions.find(
+          (pos) =>
+            pos.pos[0] === item.position[0] && pos.pos[1] === item.position[1]
+        );
 
-      if (existing) {
-        // Reinforce: add OP but max 10
-        existing.opSpent = Math.min(existing.opSpent + opSpent, 10);
-      } else {
-        this.botOccupiedPositions.push({ pos: position, opSpent });
+        if (existing) {
+          // Assume opponent also max 10
+          existing.opSpent = Math.min(
+            existing.opSpent + item.occupation_points,
+            10
+          );
+        } else {
+          this.opponentOccupiedPositions.push({
+            pos: item.position,
+            opSpent: item.occupation_points,
+          });
+        }
       }
-    } else {
-      // Remove from bot's list if present
-      this.botOccupiedPositions = this.botOccupiedPositions.filter(
-        (pos) => !(pos.pos[0] === position[0] && pos.pos[1] === position[1])
-      );
-
-      // Add or update opponent's list
-      const existing = this.opponentOccupiedPositions.find(
-        (pos) => pos.pos[0] === position[0] && pos.pos[1] === position[1]
-      );
-
-      if (existing) {
-        // Assume opponent also max 10
-        existing.opSpent = Math.min(existing.opSpent + opSpent, 10);
-      } else {
-        this.opponentOccupiedPositions.push({ pos: position, opSpent });
-      }
-    }
+    });
   }
 
   addToInventory(item: string) {
@@ -162,14 +169,14 @@ export class GameState {
   }
 
   logAllStates() {
-    console.log("bot occupied postions");
-    console.table(this.botOccupiedPositions);
-    console.log("opponent occupied postions");
-    console.table(this.opponentOccupiedPositions);
-    console.log("inventory", this.inventory);
-    console.log("bot");
-    console.table(this.bot);
-    console.log("opponent");
-    console.table(this.opponent);
+    // console.log("bot occupied postions");
+    // console.table(this.botOccupiedPositions);
+    // console.log("opponent occupied postions");
+    // console.table(this.opponentOccupiedPositions);
+    // console.log("inventory", this.inventory);
+    // console.log("bot");
+    // console.table(this.bot);
+    // console.log("opponent");
+    // console.table(this.opponent);
   }
 }

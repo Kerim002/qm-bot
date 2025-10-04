@@ -1,9 +1,9 @@
 import { filterZones } from "../helpers/filterZones";
+import { GameState } from "../services/GameState";
 import { BotStatus } from "../types/bot";
 import { MovedOutput, WSMessage, ZoneSchema } from "../types/game";
 import logger from "../utils/logger";
-import { GameState } from "./GameState";
-import { ShopService } from "./ShopService";
+import { ShopService } from "./test-shop-service";
 
 export class MessageHandler {
   constructor(
@@ -25,20 +25,22 @@ export class MessageHandler {
     switch (message.type) {
       case "player_joined":
         break;
+
       case "game_started":
-        // console.dir(message.output);
         this.setStatus("playing");
         this.gameState.updateMaxHp(message.output.players[0].max_hp);
         this.gameState.updatePlayers(message.output.players, this.botId);
-        this.gameState.updateOccupationCenters(message.output.zones);
         this.gameState.shopItems = message.output.shop_items;
         break;
+
       case "round_started":
         this.gameState.updatePlayers(message.output.players, this.botId);
         break;
+
       case "player_teleported":
         this.gameState.updatePlayerOnTeleport(message.output);
         break;
+
       case "turn_started":
         setTimeout(() => {
           this.handleTurnStart(message.output.player_id);
@@ -84,7 +86,22 @@ export class MessageHandler {
           this.gameState.updateMaxHp(message.output.players[0].max_hp);
           this.gameState.updatePlayers(message.output.players, this.botId);
           // console.log("reconnect table");
-          this.gameState.updateOccupationCenters(message.output.zones);
+          console.table(message.output.zones);
+          // filterZones(message.output.zones).forEach((item) => {
+          //   if (item.occupant_id === this.botId) {
+          //     this.gameState.updateOccupationOnRecconnect(
+          //       item.position,
+          //       true,
+          //       item.occupation_points
+          //     );
+          //   } else if (item.occupant_id) {
+          //     this.gameState.updateOccupationOnRecconnect(
+          //       item.position,
+          //       false,
+          //       item.occupation_points
+          //     );
+          //   }
+          // });
 
           const inventoryArray: string[] = Object.entries(
             message.output.inventory
@@ -110,16 +127,34 @@ export class MessageHandler {
         break;
 
       case "zone_occupation_attempted":
+        // console.table(message.output);
         this.gameState.updateOccupation(message.output);
-
+        // console.log("zone occupied attemted");
+        // console.table(message.output);
+        // console.table(message.output);
         break;
+
+      // case "error":
+      //   console.log("error");
+      //   if (message.type === "error") {
+      //     console.table(message);
+      //     // console.log("message key", message.key);
+      //     console.log("message.error.key", message.error.key);
+      //     if (message.key === "AUTH_SESSION_EXPIRED") {
+      //       this.makeAuth();
+      //     } else if (message.key === "GAME_NOT_FOUND_TO_RECONNECTION") {
+      //       this.onConnectGame(false);
+      //     } else if (message.key === "MATCHMAKING_TIMEOUT") {
+      //       this.onConnectGame(false);
+      //     }
+      //   }
+      //   break;
 
       case "error":
         if (message.type === "error") {
           logger.warn(
             `[${this.range[0]}], ${this.botName}, ${message.error.key}`
           );
-
           if (message.error.key === "AUTH_ERROR") {
             this.makeAuth();
           } else if (message.error.key === "GAME_NOT_FOUND_TO_RECONNECTION") {
@@ -135,7 +170,6 @@ export class MessageHandler {
         break;
       default:
         console.log(`Unhandled message type: `);
-        // console.dir(message);
         // console.table(message);
         break;
     }

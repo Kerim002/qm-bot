@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { basicLogin, guestLogin } from "./auth/authenticateBot";
+import { basicLogin } from "./auth/authenticateBot";
 import { GameState } from "./services/GameState";
 import { ShopService } from "./services/ShopService";
 import { MovementService } from "./services/MovementService";
@@ -35,20 +35,7 @@ export class GameBot {
     public range: number[],
     private serverUrl: string,
     private onStatusChange?: (bot: GameBot, status: string) => void
-  ) {
-    // this.messageHandler = new MessageHandler(
-    //   this.gameState,
-    //   this.shopService,
-    //   this.botId,
-    //   () => this.takeTurn(),
-    //   () => this.answerQuestion(),
-    //   () => this.endTurn(),
-    //   () => this.onGameOver(),
-    //   (payload: boolean) => this.connectToGame(payload),
-    //   () => this.relogin(),
-    //   (payload: BotStatus) => this.setStatus(payload)
-    // );
-  }
+  ) {}
 
   private setStatus(status: BotStatus) {
     this.status = status;

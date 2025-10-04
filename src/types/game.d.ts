@@ -72,7 +72,7 @@ export interface RecconnectedMessage {
         | "POST_MOVE";
       question_asked: {
         question_id: number;
-        subject_id: number;
+        subject_key: string;
         prompt: string;
         options: string[];
         elo: number;
@@ -85,7 +85,7 @@ export interface ZoneSchema {
   block: number;
   occupant_id: null | number;
   occupation_points: number;
-  subject_id: number | null;
+  subject_key: string | null;
   subject_name: string | null;
 }
 
@@ -103,13 +103,7 @@ export interface GameStartedMessage {
   type: "game_started";
   output: {
     players: (PlayerSchema & { max_hp: number })[];
-    zones: {
-      block: number;
-      subject_id: number | null;
-      subject_name: string | null;
-      occupant_id: number | null;
-      occupation_points: number;
-    }[];
+    zones: ZoneSchema[];
     shop_items: {
       [key: string]: ShopItemSchema;
     };
@@ -154,7 +148,7 @@ export interface QuestionAskedMessage {
     game_id: string;
     player_id: number;
     question_id: number;
-    subject_id: number;
+    subject_key: string;
     prompt: string;
     options: string[];
     elo: number;

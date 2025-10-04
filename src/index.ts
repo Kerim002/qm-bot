@@ -2,8 +2,9 @@ import { BotManager } from "./botManager";
 import dotenv from "dotenv";
 import { OccupiedPosition, PlayerSchema, ShopItemSchema } from "./types/game";
 import { GameState } from "./services/GameState";
-import { ShopService } from "./services/ShopService";
-import { MovementService } from "./services/MovementService";
+import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
+// import { ShopService } from "./tests/test-shop-service";
+// import { MovementService } from "./tests/test-movement-service";
 
 // import { MovementService } from "./services/MovementService";
 // import { GameState } from "./services/GameState";
@@ -18,19 +19,17 @@ manager.startBots();
 
 // const boardState = {
 //   blocked: [4, 4],
-//   myPos: [1, 4],
-//   opponentPos: [3, 5],
-//   myOP: 3,
+//   myPos: [2, 5],
+//   opponentPos: [4, 8],
+//   myOP: 10,
 //   opponentOP: 3,
-//   myCenters: [
-//     { pos: [4, 0], opSpent: 4 },
-//     { pos: [7, 1], opSpent: 6 },
-//     { pos: [8, 4], opSpent: 6 },
-//     { pos: [7, 1], opSpent: 4 },
-//   ],
+//   myCenters: [{ pos: [1, 1], opSpent: 9 }],
 //   opponentCenters: [
-//     { pos: [0, 4], opSpent: 6 },
-//     { pos: [4, 8], opSpent: 8 },
+//     { pos: [0, 4], opSpent: 1 },
+//     { pos: [4, 0], opSpent: 4 },
+//     { pos: [7, 2], opSpent: 4 },
+//     { pos: [7, 7], opSpent: 6 },
+//     { pos: [4, 8], opSpent: 4 },
 //   ],
 // };
 
@@ -40,22 +39,24 @@ manager.startBots();
 // const bestPath = pathfinder.getBestPath(board);
 // console.log("bestpath", bestPath);
 
+// new ai
+
 // const bot: PlayerSchema = {
-//   coins: 220,
-//   hp: 37,
+//   coins: 150,
+//   hp: 10,
 //   id: 1,
 //   name: "bot",
-//   position: [7, 7],
-//   power_points: 3,
+//   position: [3, 3],
+//   power_points: 6,
 // };
 
 // const opponent: PlayerSchema = {
-//   coins: 185,
-//   hp: 38,
+//   coins: 180,
+//   hp: 9,
 //   id: 2,
 //   name: "user",
-//   position: [4, 7],
-//   power_points: 0,
+//   position: [5, 5],
+//   power_points: 6,
 // };
 
 // const shopItems: {
@@ -69,15 +70,14 @@ manager.startBots();
 // };
 
 // const botOccupiedPosition: OccupiedPosition[] = [
-//   { pos: [4, 0], opSpent: 8 },
+//   { pos: [8, 4], opSpent: 6 },
 //   { pos: [7, 1], opSpent: 6 },
-//   { pos: [7, 7], opSpent: 6 },
 // ];
 // const opponentOccupiedPosition: OccupiedPosition[] = [
-//   { pos: [8, 4], opSpent: 6 },
-//   { pos: [4, 8], opSpent: 8 },
-//   { pos: [1, 1], opSpent: 2 },
-//   //   { pos: [1, 7], opSpent: 6 },
+//   { pos: [1, 7], opSpent: 10 },
+//   { pos: [4, 0], opSpent: 6 },
+//   { pos: [0, 4], opSpent: 6 },
+//   { pos: [1, 1], opSpent: 6 },
 // ];
 // const gameState = new GameState({
 //   bot: bot,
