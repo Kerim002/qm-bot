@@ -16,17 +16,28 @@ export class ShopService {
   }
 
   shouldGoToShop(): boolean {
-    const { bot, opponent } = this.gameState;
+    const { bot, opponent, inventory } = this.gameState;
     if (!bot || !opponent) return false;
 
-    const needsHealing = bot.hp < this.gameState.maxHp / 5;
+    const needsHealing = bot.hp < this.gameState.maxHp / 3;
+
     const hasEnoughCoins =
       bot.coins > this.gameState.shopItems["HEALING_POTION"]?.price;
+    // console.log(inventory);
+    // console.log(inventory.includes("HEALING_POTION"));
+    // console.log(hasEnoughCoins);
+    // console.log(this.gameState.shopItems["HEALING_POTION"]);
+    // console.log(bot.coins);
 
-    if (!needsHealing || !hasEnoughCoins) return false;
+    if (
+      !needsHealing ||
+      !hasEnoughCoins ||
+      inventory.includes("HEALING_POTION")
+    )
+      return false;
 
     const bestShopPath = getBestShopMove(bot.position, opponent.position);
-    return bestShopPath ? this.isInShopArea(bestShopPath) : false;
+    return bestShopPath ? true : false;
   }
 
   canBuyHealingPotion(): boolean {
@@ -41,11 +52,9 @@ export class ShopService {
   }
 
   shouldUseHealingPotion(): boolean {
-    const { bot } = this.gameState;
+    const { bot, maxHp } = this.gameState;
     return Boolean(
-      bot &&
-        this.gameState.hasItem("HEALING_POTION") &&
-        bot.hp < GAME_CONFIG.USE_HEAL_HP
+      bot && this.gameState.hasItem("HEALING_POTION") && bot.hp < maxHp / 4
     );
   }
 

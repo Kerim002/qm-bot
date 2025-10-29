@@ -81,6 +81,8 @@ export class MessageHandler {
       case "player_reconnected":
         if (this.botId === message.output.player_id) {
           logger.info("reconnecting");
+          // console.log(message.output);
+          this.gameState.shopItems = message.output.shop_items;
           this.gameState.updateMaxHp(message.output.players[0].max_hp);
           this.gameState.updatePlayers(message.output.players, this.botId);
           // console.log("reconnect table");
@@ -96,7 +98,7 @@ export class MessageHandler {
 
           const { phase, player_id } = message.output.turn;
           if (player_id === this.botId) {
-            console.log("phase", phase);
+            // console.log("phase", phase);
             if (phase === "AWAITING_MOVE") {
               this.handleTurnStart(player_id);
             } else if (phase === "QUESTION_ASKED") {

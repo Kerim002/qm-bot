@@ -115,6 +115,7 @@ export class GameBot {
     });
 
     this.ws.on("message", (data) => {
+      // console.log(data);
       try {
         const message = JSON.parse(data.toString());
         // console.log(message);

@@ -5,7 +5,7 @@ dotenv.config();
 const GRAPHQL_ENDPOINT =
   process.env.GRAPHQL_URL || "http://95.85.125.54:2025/graphql";
 
-console.log("graphql endpiond from env", process.env.GRAPHQL_URL);
+// console.log("graphql endpiond from env", process.env.GRAPHQL_URL);
 
 // type GuestLoginResponse = {
 //   guestLogin: {
@@ -46,7 +46,7 @@ export async function guestLogin(deviceId: string) {
       userId: Number(response.data.data.basicLogin.user.id),
     };
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     throw err;
   }
 }

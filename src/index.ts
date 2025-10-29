@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { OccupiedPosition, PlayerSchema, ShopItemSchema } from "./types/game";
 import { GameState } from "./services/GameState";
 import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
+import { getBestShopMove } from "./helpers/bestShopPath";
 // import { ShopService } from "./tests/test-shop-service";
 // import { MovementService } from "./tests/test-movement-service";
 
@@ -16,6 +17,8 @@ dotenv.config();
 const WS_URL = process.env.WS_URL || "ws://localhost:8000/ws";
 const manager = new BotManager(WS_URL);
 manager.startBots();
+
+// console.log(getBestShopMove([5, 1], [5, 3]));
 
 // const boardState = {
 //   blocked: [4, 4],

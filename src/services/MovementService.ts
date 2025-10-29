@@ -16,7 +16,6 @@ export class MovementService {
 
     if (this.shopService.shouldGoToShop()) {
       const bestPathToShop = getBestShopMove(bot.position, opponent.position);
-      // console.log("bestPathToShop", bestPathToShop);
       if (bestPathToShop) {
         const opponentBlockedArea = getOpponentBlockedArea({
           x: opponent.position[0],
@@ -28,6 +27,7 @@ export class MovementService {
           ["4,4"],
           opponentBlockedArea
         );
+
         return shortestPath !== null
           ? shortestPath.map(({ x, y }) => [x, y])
           : null;
