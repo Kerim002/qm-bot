@@ -35,18 +35,18 @@ export const GAME_CONFIG = {
 };
 
 export const GAME_TIMES = {
-  TURN_MIN: 1,
-  TURN_MAX: 2,
-  POSITION_MIN: 1,
-  POSITION_MAX: 2,
-  ANSWER_MIN: 1,
-  ANSWER_MAX: 2,
   // TURN_MIN: 1,
-  // TURN_MAX: 3,
-  // POSITION_MIN: 3,
-  // POSITION_MAX: 7,
-  // ANSWER_MIN: 5,
-  // ANSWER_MAX: 25,
+  // TURN_MAX: 2,
+  // POSITION_MIN: 1,
+  // POSITION_MAX: 2,
+  // ANSWER_MIN: 1,
+  // ANSWER_MAX: 2,
+  TURN_MIN: 1,
+  TURN_MAX: 4,
+  POSITION_MIN: 2,
+  POSITION_MAX: 6,
+  ANSWER_MIN: 6,
+  ANSWER_MAX: 20,
 };
 export type TrophyRangeConfig = {
   min: number;

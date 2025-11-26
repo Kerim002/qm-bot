@@ -18,7 +18,8 @@ export class MessageHandler {
     private onGameOver: () => void,
     private onConnectGame: (payload: boolean) => void,
     private makeAuth: () => void,
-    private setStatus: (payload: BotStatus) => void
+    private setStatus: (payload: BotStatus) => void,
+    private useHealingPotion: () => void
   ) {}
 
   handleMessage(message: WSMessage) {
@@ -40,6 +41,9 @@ export class MessageHandler {
         this.gameState.updatePlayerOnTeleport(message.output);
         break;
       case "turn_started":
+        this.gameState.changeTurn(
+          message.output.player_id == this.gameState.bot?.id
+        );
         setTimeout(() => {
           this.handleTurnStart(message.output.player_id);
         }, 2000);
@@ -65,6 +69,7 @@ export class MessageHandler {
 
       case "game_ended":
         logger.info(`Game over. Winner: ${message.output.winner_id}`);
+        logger.info(`Bot wins ${message.output.winner_id == this.botId}`);
         this.gameState.reset();
         this.onGameOver();
         break;
@@ -174,6 +179,9 @@ export class MessageHandler {
     if (output.player_id === this.botId && this.gameState.bot) {
       this.gameState.addToInventory(output.item_type);
       this.gameState.bot.coins = output.remaining_coins;
+      if (this.gameState.isBotTurn) {
+        this.useHealingPotion();
+      }
       // console.log("Remaining coins:", this.gameState.bot.coins);
       // console.log("Inventory:", this.gameState.inventory);
     }

@@ -30,6 +30,7 @@ export class GameState {
   } = {};
   public inventory: string[] = [];
   public maxHp: number = 0;
+  public isBotTurn: boolean = false;
 
   constructor(options: GameStateOptions = {}) {
     this.bot = options.bot;
@@ -166,6 +167,10 @@ export class GameState {
 
   hasItem(item: string): boolean {
     return this.inventory.includes(item);
+  }
+
+  changeTurn(payload: boolean) {
+    this.isBotTurn = payload;
   }
 
   logAllStates() {

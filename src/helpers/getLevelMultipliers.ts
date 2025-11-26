@@ -20,9 +20,9 @@ export function getLevelMultipliers(
       };
     case "low":
       return {
-        aggression: 0.7,
-        riskTaking: 0.8,
-        efficiency: 0.9,
+        aggression: 0.3,
+        riskTaking: 0.2,
+        efficiency: 0.2,
       };
   }
 

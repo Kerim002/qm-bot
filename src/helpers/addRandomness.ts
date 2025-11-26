@@ -24,7 +24,7 @@ export function addRandomness(
       randomFactor = 0.5;
       break;
     case "low":
-      randomFactor = 0.15;
+      randomFactor = 0.25;
       break;
   }
 

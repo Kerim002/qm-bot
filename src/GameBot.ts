@@ -52,11 +52,16 @@ export class GameBot {
     this.setStatus("idle");
   }
 
-  private takeTurn() {
+  private useHealingPotion() {
     if (this.shopService.shouldUseHealingPotion()) {
-      this.sendMessage({ type: "use_healing_potion", input: {} });
+      setTimeout(() => {
+        this.sendMessage({ type: "use_healing_potion", input: {} });
+      }, 1500);
     }
+  }
 
+  private takeTurn() {
+    this.useHealingPotion();
     if (this.shopService.canBuyHealingPotion()) {
       this.sendMessage({
         type: "buy_item",
@@ -172,7 +177,8 @@ export class GameBot {
         () => this.onGameOver(),
         (payload: boolean) => this.connectToGame(payload),
         () => this.relogin(),
-        (payload: BotStatus) => this.setStatus(payload)
+        (payload: BotStatus) => this.setStatus(payload),
+        () => this.useHealingPotion()
       );
 
       this.connectToGame();
