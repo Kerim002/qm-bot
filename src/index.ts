@@ -1,16 +1,5 @@
 import { BotManager } from "./botManager";
 import dotenv from "dotenv";
-import { OccupiedPosition, PlayerSchema, ShopItemSchema } from "./types/game";
-import { GameState } from "./services/GameState";
-import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
-import { getBestShopMove } from "./helpers/bestShopPath";
-// import { ShopService } from "./tests/test-shop-service";
-// import { MovementService } from "./tests/test-movement-service";
-
-// import { MovementService } from "./services/MovementService";
-// import { GameState } from "./services/GameState";
-// import { BoardGamePathfinder } from "./bot/BoardFindBestPlace";
-// import { bestMove, BoardState } from "./tests/best-move-test";
 
 dotenv.config();
 
@@ -46,10 +35,10 @@ manager.startBots();
 
 // const bot: PlayerSchema = {
 //   coins: 150,
-//   hp: 10,
+//   hp: 4,
 //   id: 1,
 //   name: "bot",
-//   position: [3, 3],
+//   position: [5, 3],
 //   power_points: 6,
 // };
 
@@ -58,7 +47,7 @@ manager.startBots();
 //   hp: 9,
 //   id: 2,
 //   name: "user",
-//   position: [5, 5],
+//   position: [3, 3],
 //   power_points: 6,
 // };
 
@@ -73,20 +62,20 @@ manager.startBots();
 // };
 
 // const botOccupiedPosition: OccupiedPosition[] = [
-//   { pos: [8, 4], opSpent: 6 },
-//   { pos: [7, 1], opSpent: 6 },
+//   //   { pos: [8, 4], opSpent: 6 },
+//   //   { pos: [7, 1], opSpent: 6 },
 // ];
 // const opponentOccupiedPosition: OccupiedPosition[] = [
-//   { pos: [1, 7], opSpent: 10 },
-//   { pos: [4, 0], opSpent: 6 },
-//   { pos: [0, 4], opSpent: 6 },
-//   { pos: [1, 1], opSpent: 6 },
+//   //   { pos: [1, 7], opSpent: 10 },
+//   //   { pos: [4, 0], opSpent: 6 },
+//   //   { pos: [0, 4], opSpent: 6 },
+//   //   { pos: [1, 1], opSpent: 6 },
 // ];
 // const gameState = new GameState({
 //   bot: bot,
 //   botOccupiedPositions: botOccupiedPosition,
 //   inventory: [],
-//   maxHp: 100,
+//   maxHp: 45,
 //   opponent: opponent,
 //   opponentOccupiedPositions: opponentOccupiedPosition,
 //   shopItems: shopItems,

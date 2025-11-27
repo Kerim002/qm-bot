@@ -21,20 +21,13 @@ export class ShopService {
 
     const needsHealing = bot.hp < this.gameState.maxHp / 3;
 
-    const hasEnoughCoins =
-      bot.coins > this.gameState.shopItems["HEALING_POTION"]?.price;
     // console.log(inventory);
     // console.log(inventory.includes("HEALING_POTION"));
     // console.log(hasEnoughCoins);
     // console.log(this.gameState.shopItems["HEALING_POTION"]);
     // console.log(bot.coins);
 
-    if (
-      !needsHealing ||
-      !hasEnoughCoins ||
-      inventory.includes("HEALING_POTION")
-    )
-      return false;
+    if (!needsHealing || inventory.includes("HEALING_POTION")) return false;
 
     const bestShopPath = getBestShopMove(bot.position, opponent.position);
     return bestShopPath ? true : false;

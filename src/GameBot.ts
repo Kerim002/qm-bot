@@ -84,6 +84,7 @@ export class GameBot {
   }
 
   private endTurn() {
+    this.useHealingPotion();
     setTimeout(() => {
       this.sendMessage({ type: "end_turn", input: {} });
     }, getRandomTimeInMs(GAME_TIMES.TURN_MIN, GAME_TIMES.TURN_MAX));

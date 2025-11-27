@@ -31,13 +31,13 @@ export class BotManager {
     }));
 
     // this.ranges = [
-    //   {
-    //     min: 0,
-    //     max: 500,
-    //     names: ["Grace_miller"],
-    //     activeNames: new Set(),
-    //     bots: new Map(),
-    //   },
+    //   // {
+    //   //   min: 0,
+    //   //   max: 500,
+    //   //   names: ["Grace_miller"],
+    //   //   activeNames: new Set(),
+    //   //   bots: new Map(),
+    //   // },
     //   // {
     //   //   min: 11000,
     //   //   max: 11500,

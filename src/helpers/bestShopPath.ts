@@ -4,7 +4,7 @@ const directions: Position[] = [
   [1, 0],
   [-1, 0],
   [0, 1],
-  [0, -1], // only 4-way
+  [0, -1],
 ];
 
 export function getBestShopMove(
@@ -12,9 +12,7 @@ export function getBestShopMove(
   opponentPos: Position
 ): Position | null {
   const size = 9;
-  const shop: Position = [4, 4];
 
-  // ✅ All 8 shop target cells
   const shopTargets: Position[] = [
     [3, 3],
     [3, 4],
@@ -26,12 +24,7 @@ export function getBestShopMove(
     [5, 5],
   ];
 
-  // ❌ If already inside shop area, return null
-  if (shopTargets.some(([ty, tx]) => ty === myPos[0] && tx === myPos[1])) {
-    return null;
-  }
-
-  // Block opponent area (itself + all 8 neighbors)
+  // Block opponent + 8 neighbors
   const blocked = new Set<string>();
   const oppDirs: Position[] = [
     [0, 0],
@@ -52,9 +45,38 @@ export function getBestShopMove(
     }
   }
 
-  // BFS search with limit = 3
+  const myKey = `${myPos[0]},${myPos[1]}`;
+
+  const isInShop = shopTargets.some(
+    ([ty, tx]) => ty === myPos[0] && tx === myPos[1]
+  );
+
+  // ---------------------------------------------------------
+  // ✅ If already inside shop → pick the next closest shop cell
+  // ---------------------------------------------------------
+  if (isInShop) {
+    const candidates = shopTargets
+      .filter(([y, x]) => `${y},${x}` !== myKey) // exclude my own cell
+      .filter(([y, x]) => !blocked.has(`${y},${x}`)); // not blocked
+
+    if (candidates.length === 0) return null;
+
+    // choose closest in manhattan distance
+    candidates.sort(
+      (a, b) =>
+        Math.abs(a[0] - myPos[0]) +
+        Math.abs(a[1] - myPos[1]) -
+        (Math.abs(b[0] - myPos[0]) + Math.abs(b[1] - myPos[1]))
+    );
+
+    return candidates[0];
+  }
+
+  // ---------------------------------------------------------
+  // Normal BFS search (limit 3)
+  // ---------------------------------------------------------
   const queue: [Position, number][] = [[myPos, 0]];
-  const visited = new Set<string>([`${myPos[0]},${myPos[1]}`]);
+  const visited = new Set<string>([myKey]);
 
   let bestCell: Position | null = null;
   let bestDist = Infinity;
@@ -63,23 +85,24 @@ export function getBestShopMove(
     const [pos, dist] = queue.shift()!;
     const [y, x] = pos;
 
-    // ✅ If reached a shop target, return immediately
+    // Win: reached a shop cell
     if (shopTargets.some(([ty, tx]) => ty === y && tx === x)) {
       return pos;
     }
 
-    // Track best progress (closest to shop targets)
-    const minShopDist = Math.min(
+    // Track closest to ANY shopTarget
+    const d = Math.min(
       ...shopTargets.map(([ty, tx]) => Math.abs(ty - y) + Math.abs(tx - x))
     );
-    if (minShopDist < bestDist) {
-      bestDist = minShopDist;
+
+    if (d < bestDist) {
+      bestDist = d;
       bestCell = pos;
     }
 
-    if (dist === 3) continue; // can't move more than 3
+    if (dist === 3) continue;
 
-    for (let [dy, dx] of directions) {
+    for (const [dy, dx] of directions) {
       const ny = y + dy;
       const nx = x + dx;
       if (ny < 0 || ny >= size || nx < 0 || nx >= size) continue;
@@ -92,9 +115,9 @@ export function getBestShopMove(
     }
   }
 
-  return bestCell
-    ? bestCell[0] !== myPos[0] || bestCell[1] !== myPos[1]
-      ? bestCell
-      : null
-    : bestCell;
+  // If bestCell is just my own position → no move
+  if (!bestCell) return null;
+  if (bestCell[0] === myPos[0] && bestCell[1] === myPos[1]) return null;
+
+  return bestCell;
 }
